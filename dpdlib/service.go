@@ -5,32 +5,29 @@ import (
 	"github.com/fiorix/wsdl2go/soap"
 	"log"
 	"strings"
+	"sync"
 )
 
 type commonPoint struct {
-	code         string
-	latitude     string
-	longitude    string
+	code      string
+	latitude  string
+	longitude string
+	limits    normalizedLimits
+	schedule  string
+	cityCode  uint32
+	state     string
+}
+
+type normalizedLimits struct {
 	maxWeight    float32
 	maxWidth     float32
 	maxHeight    float32
 	maxLength    float32
 	dimensionSum float32
-	schedule     string
-	cityCode     uint32
-	state        string
 }
 
-type normalizedLimits struct {
-	maxWeight float32
-	maxWidth float32
-	maxHeight float32
-	maxLength float32
-	dimensionSum float32
-}
-
-func NewDpdSdk(clientNumber int64, clientKey, countryCode string) dpdSdk {
-	return dpdSdk{
+func NewDpdSdk(clientNumber int64, clientKey, countryCode string) DpdSdk {
+	return &dpdSdk{
 		clientNumber: clientNumber,
 		clientKey:    clientKey,
 		countryCode:  countryCode,
@@ -45,8 +42,8 @@ type dpdSdk struct {
 
 type DpdSdk interface {
 	GetOffers() []*ServiceCost
-	GetPoints()
-	getLimitedPoints(geography2 DPDGeography2)
+	GetPoints() []*commonPoint
+	//getLimitedPoints(geography2 DPDGeography2)
 	//getUnlimitedPoints(geography2 DPDGeography2)
 
 }
@@ -131,16 +128,32 @@ func (sdk dpdSdk) getUnlimitedPoints(service DPDGeography2) []*commonPoint {
 
 func convertDpdUnlimitedPoints2Common(terminals []*TerminalSelf) []*commonPoint {
 	var commonPoints []*commonPoint
+	commonPointChannel := make(chan *commonPoint, 10)
+	var wg sync.WaitGroup
 
 	for _, terminal := range terminals {
-		commonPoints = append(commonPoints, &commonPoint{
-			code:      *terminal.TerminalCode,
-			latitude:  fmt.Sprintf("%g", *terminal.GeoCoordinates.Latitude),
-			longitude: fmt.Sprintf("%g", *terminal.GeoCoordinates.Longitude),
-			schedule:  getStrSchedule(terminal.Schedule),
-			cityCode:  uint32(*terminal.Address.CityId),
-			state:     "Open",
-		})
+		wg.Add(1)
+		go func(terminal *TerminalSelf) {
+			defer wg.Done()
+
+			commonPointChannel <- &commonPoint{
+				code:      *terminal.TerminalCode,
+				latitude:  fmt.Sprintf("%g", *terminal.GeoCoordinates.Latitude),
+				longitude: fmt.Sprintf("%g", *terminal.GeoCoordinates.Longitude),
+				schedule:  getStrSchedule(terminal.Schedule),
+				cityCode:  uint32(*terminal.Address.CityId),
+				state:     "Open",
+			}
+		}(terminal)
+	}
+
+	go func() {
+		wg.Wait()
+		close(commonPointChannel)
+	}()
+
+	for point := range commonPointChannel {
+		commonPoints = append(commonPoints, point)
 	}
 
 	return commonPoints
@@ -148,75 +161,86 @@ func convertDpdUnlimitedPoints2Common(terminals []*TerminalSelf) []*commonPoint 
 
 func convertDpdLimitedPoints2Common(shops []*ParcelShop) []*commonPoint {
 	var commonPoints []*commonPoint
+	var wg sync.WaitGroup
+
+	pointsChannel := make(chan *commonPoint, 50)
 
 	for _, shop := range shops {
+		wg.Add(1)
+		go func(shop *ParcelShop) {
+			defer wg.Done()
 
-		weight, width, length, height, dimensionSum := getValidLimits(shop.Limits)
+			pointsChannel <- &commonPoint{
+				code:      *shop.Code,
+				latitude:  fmt.Sprintf("%g", *shop.GeoCoordinates.Latitude),
+				longitude: fmt.Sprintf("%g", *shop.GeoCoordinates.Longitude),
+				limits:    getValidLimits(shop.Limits),
+				schedule:  getStrSchedule(shop.Schedule),
+				cityCode:  uint32(*shop.Address.CityId),
+				state:     *shop.State,
+			}
+		}(shop)
+	}
 
-		commonPoints = append(commonPoints, &commonPoint{
-			code:         *shop.Code,
-			latitude:     fmt.Sprintf("%g", *shop.GeoCoordinates.Latitude),
-			longitude:    fmt.Sprintf("%g", *shop.GeoCoordinates.Longitude),
-			maxWeight:    weight,
-			maxHeight:    height,
-			maxLength:    length,
-			maxWidth:     width,
-			dimensionSum: dimensionSum,
-			schedule:     getStrSchedule(shop.Schedule),
-			cityCode:     uint32(*shop.Address.CityId),
-			state:        *shop.State,
-		})
+	go func() {
+		wg.Wait()
+		close(pointsChannel)
+	}()
+
+	for point := range pointsChannel {
+		commonPoints = append(commonPoints, point)
 	}
 
 	return commonPoints
 }
 
-func getValidLimits(limits *Limits) (float32, float32, float32, float32, float32) {
-
-	var weight, width, length, height, dimensionSum float32
+func getValidLimits(limits *Limits) normalizedLimits {
+	var normalizedLimits normalizedLimits
 
 	if limits == nil {
-		return weight, width, length, height, dimensionSum
+		return normalizedLimits
 	}
 
 	if limits.MaxWeight != nil {
-		weight = float32(*limits.MaxWeight)
+		normalizedLimits.maxWeight = float32(*limits.MaxWeight)
 	}
 
 	if limits.MaxWidth != nil {
-		width = float32(*limits.MaxWidth)
+		normalizedLimits.maxWidth = float32(*limits.MaxWidth)
 	}
 
 	if limits.MaxLength != nil {
-		length = float32(*limits.MaxLength)
+		normalizedLimits.maxLength = float32(*limits.MaxLength)
 	}
 
 	if limits.MaxHeight != nil {
-		height = float32(*limits.MaxHeight)
+		normalizedLimits.maxHeight = float32(*limits.MaxHeight)
 	}
 
 	if limits.DimensionSum != nil {
-		dimensionSum = float32(*limits.DimensionSum)
+		normalizedLimits.dimensionSum = float32(*limits.DimensionSum)
 	}
 
-	return weight, width, length, height, dimensionSum
+	return normalizedLimits
 }
 
 func getStrSchedule(schedule []*Schedule) string {
 
-	var timetable []*Timetable
-	var normalizedSchedule string
+	if schedule == nil || len(schedule) == 0 {
+		return ""
+	}
 
-	for _, item := range schedule {
-		if strings.Compare(*item.Operation, "SelfPickup") == 0 {
-			timetable = item.Timetable
-			break
+	//Обычно SelfDelivery - самый последний элемент массива
+	lastItem := schedule[len(schedule)-1:]
+
+	if len(lastItem) > 0 && strings.Compare(*lastItem[0].Operation, "SelfDelivery") == 0 {
+		var tt []string
+		for _, schedule := range lastItem[0].Timetable {
+			tt = append(tt, *schedule.WeekDays+" "+*schedule.WorkTime)
 		}
+
+		return strings.Join(tt, " ")
 	}
 
-	for _, schedule := range timetable {
-		normalizedSchedule += *schedule.WeekDays + " " + *schedule.WorkTime
-	}
-
-	return normalizedSchedule
+	return getStrSchedule(schedule[:len(schedule)-1])
 }
