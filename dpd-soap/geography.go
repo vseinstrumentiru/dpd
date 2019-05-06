@@ -1,6 +1,110 @@
-package dpdlib
+package dpd_soap
 
 import "github.com/fiorix/wsdl2go/soap"
+
+const GeographyNamespace = "http://dpd.ru/ws/geography/2015-05-20"
+
+func NewDPDGeography2(cli *soap.Client) DPDGeography2 {
+	return &dPDGeography2{cli}
+}
+
+type DPDGeography2 interface {
+	GetCitiesCashPay(GetCitiesCashPay *GetCitiesCashPay) (*GetCitiesCashPayResponse, error)
+	GetParcelShops(GetParcelShops *GetParcelShops) (*GetParcelShopsResponse, error)
+	GetPossibleExtraService(GetPossibleExtraService *GetPossibleExtraService) (*GetPossibleExtraServiceResponse, error)
+	GetStoragePeriod(GetStoragePeriod *GetStoragePeriod) (*GetStoragePeriodResponse, error)
+	GetTerminalsSelfDelivery2(GetTerminalsSelfDelivery2 *GetTerminalsSelfDelivery2) (*GetTerminalsSelfDelivery2Response, error)
+}
+
+func (p *dPDGeography2) GetCitiesCashPay(GetCitiesCashPay *GetCitiesCashPay) (*GetCitiesCashPayResponse, error) {
+	α := struct {
+		OperationGetCitiesCashPay `xml:"tns:getCitiesCashPay"`
+	}{
+		OperationGetCitiesCashPay{
+			GetCitiesCashPay,
+		},
+	}
+
+	γ := struct {
+		OperationGetCitiesCashPayResponse `xml:"getCitiesCashPayResponse"`
+	}{}
+	if err := p.cli.RoundTripWithAction("GetCitiesCashPay", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.GetCitiesCashPayResponse, nil
+}
+
+func (p *dPDGeography2) GetParcelShops(GetParcelShops *GetParcelShops) (*GetParcelShopsResponse, error) {
+	α := struct {
+		OperationGetParcelShops `xml:"tns:getParcelShops"`
+	}{
+		OperationGetParcelShops{
+			GetParcelShops,
+		},
+	}
+
+	γ := struct {
+		OperationGetParcelShopsResponse `xml:"getParcelShopsResponse"`
+	}{}
+	if err := p.cli.RoundTripWithAction("GetParcelShops", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.GetParcelShopsResponse, nil
+}
+
+func (p *dPDGeography2) GetPossibleExtraService(GetPossibleExtraService *GetPossibleExtraService) (*GetPossibleExtraServiceResponse, error) {
+	α := struct {
+		OperationGetPossibleExtraService `xml:"tns:getPossibleExtraService"`
+	}{
+		OperationGetPossibleExtraService{
+			GetPossibleExtraService,
+		},
+	}
+
+	γ := struct {
+		OperationGetPossibleExtraServiceResponse `xml:"getPossibleExtraServiceResponse"`
+	}{}
+	if err := p.cli.RoundTripWithAction("GetPossibleExtraService", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.GetPossibleExtraServiceResponse, nil
+}
+
+func (p *dPDGeography2) GetStoragePeriod(GetStoragePeriod *GetStoragePeriod) (*GetStoragePeriodResponse, error) {
+	α := struct {
+		OperationGetStoragePeriod `xml:"tns:getStoragePeriod"`
+	}{
+		OperationGetStoragePeriod{
+			GetStoragePeriod,
+		},
+	}
+
+	γ := struct {
+		OperationGetStoragePeriodResponse `xml:"getStoragePeriodResponse"`
+	}{}
+	if err := p.cli.RoundTripWithAction("GetStoragePeriod", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.GetStoragePeriodResponse, nil
+}
+
+func (p *dPDGeography2) GetTerminalsSelfDelivery2(GetTerminalsSelfDelivery2 *GetTerminalsSelfDelivery2) (*GetTerminalsSelfDelivery2Response, error) {
+	α := struct {
+		OperationGetTerminalsSelfDelivery2 `xml:"tns:getTerminalsSelfDelivery2"`
+	}{
+		OperationGetTerminalsSelfDelivery2{
+			GetTerminalsSelfDelivery2,
+		},
+	}
+
+	γ := struct {
+		OperationGetTerminalsSelfDelivery2Response `xml:"getTerminalsSelfDelivery2Response"`
+	}{}
+	if err := p.cli.RoundTripWithAction("GetTerminalsSelfDelivery2", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.GetTerminalsSelfDelivery2Response, nil
+}
 
 type GeographyAddress struct {
 	CityId      *int64  `xml:"cityId,omitempty"`
@@ -33,12 +137,13 @@ type City struct {
 }
 
 type DpdCitiesCashPayRequest struct {
+	NS          string  `xml:"xmlns,attr"`
 	Auth        *Auth   `xml:"auth,omitempty"`
 	CountryCode *string `xml:"countryCode,omitempty"`
 }
 
 type DpdParcelShopRequest struct {
-	Ns			string	`xml:"xmlns,attr"`
+	Ns          string  `xml:"xmlns,attr"`
 	Auth        *Auth   `xml:"auth,omitempty"`
 	CountryCode *string `xml:"countryCode,omitempty"`
 	RegionCode  *string `xml:"regionCode,omitempty"`
@@ -67,8 +172,8 @@ type DpdPossibleESRequest struct {
 	Auth         *Auth                        `xml:"auth,omitempty"`
 	Pickup       *DpdPossibleESPickupDelivery `xml:"pickup,omitempty"`
 	Delivery     *DpdPossibleESPickupDelivery `xml:"delivery,omitempty"`
-	SelfPickup   *bool                        `xml:"selfPickup,omitempty"`
-	SelfDelivery *bool                        `xml:"selfDelivery,omitempty"`
+	SelfPickup   *bool                        `xml:"SelfPickup,omitempty"`
+	SelfDelivery *bool                        `xml:"SelfDelivery,omitempty"`
 	ServiceCode  *string                      `xml:"serviceCode,omitempty"`
 	PickupDate   *Date                        `xml:"pickupDate,omitempty"`
 	Options      *DpdPossibleESOption         `xml:"options,omitempty"`
@@ -100,6 +205,7 @@ type GeoCoordinates struct {
 }
 
 type GetCitiesCashPay struct {
+	NS      string                   `xml:"xmlns,attr"`
 	Request *DpdCitiesCashPayRequest `xml:"request,omitempty"`
 }
 
@@ -109,7 +215,7 @@ type GetCitiesCashPayResponse struct {
 
 type GetParcelShops struct {
 	Request *DpdParcelShopRequest `xml:"request,omitempty"`
-	Ns 			string  `xml:"xmlns,attr"`
+	Ns      string                `xml:"xmlns,attr"`
 }
 
 type GetParcelShopsResponse struct {
@@ -133,8 +239,8 @@ type GetStoragePeriodResponse struct {
 }
 
 type GetTerminalsSelfDelivery2 struct {
-	Ns			string	`xml:"xmlns,attr"`
-	Auth *Auth `xml:"auth,omitempty"`
+	Ns   string `xml:"xmlns,attr"`
+	Auth *Auth  `xml:"auth,omitempty"`
 }
 
 type GetTerminalsSelfDelivery2Response struct {
@@ -159,9 +265,9 @@ type ParcelShop struct {
 	ClientDepartmentNum *string           `xml:"clientDepartmentNum,omitempty"`
 	GeoCoordinates      *GeoCoordinates   `xml:"geoCoordinates,omitempty"`
 	Limits              *Limits           `xml:"limits,omitempty"`
-	Schedule            []*Schedule     `xml:"schedule,omitempty"`
-	ExtraService        []*ExtraService `xml:"extraService,omitempty"`
-	Services            []*string       `xml:"services>serviceCode,omitempty"`
+	Schedule            []*Schedule       `xml:"schedule,omitempty"`
+	ExtraService        []*ExtraService   `xml:"extraService,omitempty"`
+	Services            []*string         `xml:"services>serviceCode,omitempty"`
 }
 
 type PossibleExtraService struct {

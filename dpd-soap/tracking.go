@@ -1,13 +1,112 @@
-package dpdlib
+package dpd_soap
 
+import "github.com/fiorix/wsdl2go/soap"
 
+const TrackingNamespace = "http://dpd.ru/ws/tracing/2011-11-18"
 
-type Confirm struct {
-	Request *RequestConfirm `xml:"request,omitempty"`
+type parcelTracing struct {
+	cli *soap.Client
 }
 
-type ConfirmResponse struct {
-	Return *string `xml:"return,omitempty"`
+func NewParcelTracing(cli *soap.Client) ParcelTracing {
+	return &parcelTracing{cli}
+}
+
+type ParcelTracing interface {
+	GetStatesByClient(GetStatesByClient *GetStatesByClient) (*GetStatesByClientResponse, error)
+	GetStatesByClientOrder(GetStatesByClientOrder *GetStatesByClientOrder) (*GetStatesByClientOrderResponse, error)
+	GetStatesByClientParcel(GetStatesByClientParcel *GetStatesByClientParcel) (*GetStatesByClientParcelResponse, error)
+	GetStatesByDPDOrder(GetStatesByDPDOrder *GetStatesByDPDOrder) (*GetStatesByDPDOrderResponse, error)
+}
+
+func (p *parcelTracing) Confirm(Confirm *Confirm) (*ConfirmResponse, error) {
+	α := struct {
+		OperationConfirm `xml:"tns:confirm"`
+	}{
+		OperationConfirm{
+			Confirm,
+		},
+	}
+
+	γ := struct {
+		OperationConfirmResponse `xml:"confirmResponse"`
+	}{}
+	if err := p.cli.RoundTripWithAction("Confirm", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.ConfirmResponse, nil
+}
+
+func (p *parcelTracing) GetStatesByClient(GetStatesByClient *GetStatesByClient) (*GetStatesByClientResponse, error) {
+	α := struct {
+		OperationGetStatesByClient `xml:"tns:getStatesByClient"`
+	}{
+		OperationGetStatesByClient{
+			GetStatesByClient,
+		},
+	}
+
+	γ := struct {
+		OperationGetStatesByClientResponse `xml:"getStatesByClientResponse"`
+	}{}
+	if err := p.cli.RoundTripWithAction("GetStatesByClient", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.GetStatesByClientResponse, nil
+}
+
+func (p *parcelTracing) GetStatesByClientOrder(GetStatesByClientOrder *GetStatesByClientOrder) (*GetStatesByClientOrderResponse, error) {
+	α := struct {
+		OperationGetStatesByClientOrder `xml:"tns:getStatesByClientOrder"`
+	}{
+		OperationGetStatesByClientOrder{
+			GetStatesByClientOrder,
+		},
+	}
+
+	γ := struct {
+		OperationGetStatesByClientOrderResponse `xml:"getStatesByClientOrderResponse"`
+	}{}
+	if err := p.cli.RoundTripWithAction("GetStatesByClientOrder", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.GetStatesByClientOrderResponse, nil
+}
+
+func (p *parcelTracing) GetStatesByClientParcel(GetStatesByClientParcel *GetStatesByClientParcel) (*GetStatesByClientParcelResponse, error) {
+	α := struct {
+		OperationGetStatesByClientParcel `xml:"tns:getStatesByClientParcel"`
+	}{
+		OperationGetStatesByClientParcel{
+			GetStatesByClientParcel,
+		},
+	}
+
+	γ := struct {
+		OperationGetStatesByClientParcelResponse `xml:"getStatesByClientParcelResponse"`
+	}{}
+	if err := p.cli.RoundTripWithAction("GetStatesByClientParcel", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.GetStatesByClientParcelResponse, nil
+}
+
+func (p *parcelTracing) GetStatesByDPDOrder(GetStatesByDPDOrder *GetStatesByDPDOrder) (*GetStatesByDPDOrderResponse, error) {
+	α := struct {
+		OperationGetStatesByDPDOrder `xml:"tns:getStatesByDPDOrder"`
+	}{
+		OperationGetStatesByDPDOrder{
+			GetStatesByDPDOrder,
+		},
+	}
+
+	γ := struct {
+		OperationGetStatesByDPDOrderResponse `xml:"getStatesByDPDOrderResponse"`
+	}{}
+	if err := p.cli.RoundTripWithAction("GetStatesByDPDOrder", α, &γ); err != nil {
+		return nil, err
+	}
+	return γ.GetStatesByDPDOrderResponse, nil
 }
 
 type GetStatesByClient struct {
@@ -58,11 +157,6 @@ type RequestClientParcel struct {
 	PickupDate     *Date   `xml:"pickupDate,omitempty"`
 }
 
-type RequestConfirm struct {
-	Auth  *Auth  `xml:"auth,omitempty"`
-	DocId *int64 `xml:"docId,omitempty"`
-}
-
 type RequestDpdOrder struct {
 	Auth       *Auth   `xml:"auth,omitempty"`
 	DpdOrderNr *string `xml:"dpdOrderNr,omitempty"`
@@ -94,14 +188,6 @@ type StateParcels struct {
 	ClientNumber   *int64         `xml:"clientNumber,omitempty"`
 	ResultComplete *bool          `xml:"resultComplete,omitempty"`
 	States         []*StateParcel `xml:"states,omitempty"`
-}
-
-type OperationConfirm struct {
-	Confirm *Confirm `xml:"confirm,omitempty"`
-}
-
-type OperationConfirmResponse struct {
-	ConfirmResponse *ConfirmResponse `xml:"confirmResponse,omitempty"`
 }
 
 type OperationGetStatesByClient struct {

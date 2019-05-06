@@ -24,11 +24,10 @@
 #   go-tests = true
 #   unused-packages = true
 
-required = [
-    "github.com/tiaguinho/gosoap",
-    "github.com/fiorix/wsdl2go/soap",
-    "github.com/spf13/viper"
-    ]
+
+[[constraint]]
+  name = "github.com/fiorix/wsdl2go"
+  version = "1.4.6"
 
 [prune]
   go-tests = true
