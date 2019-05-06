@@ -5,7 +5,7 @@ import (
 	"github.com/fiorix/wsdl2go/soap"
 	"log"
 	"strings"
-	"sync"
+	"time"
 )
 
 type commonPoint struct {
@@ -97,13 +97,23 @@ func (sdk dpdSdk) getLimitedPoints(service DPDGeography2) []*commonPoint {
 		},
 	}
 
+	start := time.Now()
+
 	result, err := service.GetParcelShops(limitedPointsReq)
+
+	PrintTime("Dpd parcel shops req", start)
 
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
 
-	return convertDpdLimitedPoints2Common(result.Return.ParcelShop)
+	start = time.Now()
+
+	commonPoints := convertDpdLimitedPoints2Common(result.Return.ParcelShop)
+
+	PrintTime("Convert parcel shops", start)
+
+	return commonPoints
 }
 
 func (sdk dpdSdk) getUnlimitedPoints(service DPDGeography2) []*commonPoint {
@@ -115,45 +125,37 @@ func (sdk dpdSdk) getUnlimitedPoints(service DPDGeography2) []*commonPoint {
 		},
 	}
 
+	start := time.Now()
+
 	result, err := service.GetTerminalsSelfDelivery2(unlimitedPointsReq)
+
+	PrintTime("Dpd terminals req", start)
 
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
 
+	start = time.Now()
+
 	commonPoints := convertDpdUnlimitedPoints2Common(result.Return.Terminal)
+
+	PrintTime("Convert terminals", start)
 
 	return commonPoints
 }
 
 func convertDpdUnlimitedPoints2Common(terminals []*TerminalSelf) []*commonPoint {
 	var commonPoints []*commonPoint
-	commonPointChannel := make(chan *commonPoint, 10)
-	var wg sync.WaitGroup
 
 	for _, terminal := range terminals {
-		wg.Add(1)
-		go func(terminal *TerminalSelf) {
-			defer wg.Done()
-
-			commonPointChannel <- &commonPoint{
-				code:      *terminal.TerminalCode,
-				latitude:  fmt.Sprintf("%g", *terminal.GeoCoordinates.Latitude),
-				longitude: fmt.Sprintf("%g", *terminal.GeoCoordinates.Longitude),
-				schedule:  getStrSchedule(terminal.Schedule),
-				cityCode:  uint32(*terminal.Address.CityId),
-				state:     "Open",
-			}
-		}(terminal)
-	}
-
-	go func() {
-		wg.Wait()
-		close(commonPointChannel)
-	}()
-
-	for point := range commonPointChannel {
-		commonPoints = append(commonPoints, point)
+		commonPoints = append(commonPoints, &commonPoint{
+			code:      *terminal.TerminalCode,
+			latitude:  fmt.Sprintf("%g", *terminal.GeoCoordinates.Latitude),
+			longitude: fmt.Sprintf("%g", *terminal.GeoCoordinates.Longitude),
+			schedule:  getStrSchedule(terminal.Schedule),
+			cityCode:  uint32(*terminal.Address.CityId),
+			state:     "Open",
+		})
 	}
 
 	return commonPoints
@@ -161,34 +163,17 @@ func convertDpdUnlimitedPoints2Common(terminals []*TerminalSelf) []*commonPoint 
 
 func convertDpdLimitedPoints2Common(shops []*ParcelShop) []*commonPoint {
 	var commonPoints []*commonPoint
-	var wg sync.WaitGroup
-
-	pointsChannel := make(chan *commonPoint, 50)
 
 	for _, shop := range shops {
-		wg.Add(1)
-		go func(shop *ParcelShop) {
-			defer wg.Done()
-
-			pointsChannel <- &commonPoint{
-				code:      *shop.Code,
-				latitude:  fmt.Sprintf("%g", *shop.GeoCoordinates.Latitude),
-				longitude: fmt.Sprintf("%g", *shop.GeoCoordinates.Longitude),
-				limits:    getValidLimits(shop.Limits),
-				schedule:  getStrSchedule(shop.Schedule),
-				cityCode:  uint32(*shop.Address.CityId),
-				state:     *shop.State,
-			}
-		}(shop)
-	}
-
-	go func() {
-		wg.Wait()
-		close(pointsChannel)
-	}()
-
-	for point := range pointsChannel {
-		commonPoints = append(commonPoints, point)
+		commonPoints = append(commonPoints, &commonPoint{
+			code:      *shop.Code,
+			latitude:  fmt.Sprintf("%g", *shop.GeoCoordinates.Latitude),
+			longitude: fmt.Sprintf("%g", *shop.GeoCoordinates.Longitude),
+			limits:    getValidLimits(shop.Limits),
+			schedule:  getStrSchedule(shop.Schedule),
+			cityCode:  uint32(*shop.Address.CityId),
+			state:     *shop.State,
+		})
 	}
 
 	return commonPoints
@@ -243,4 +228,9 @@ func getStrSchedule(schedule []*Schedule) string {
 	}
 
 	return getStrSchedule(schedule[:len(schedule)-1])
+}
+
+func PrintTime(description string, start time.Time) {
+	end := time.Now()
+	fmt.Printf("Action: %s, Duration: %f\n", description, end.Sub(start).Seconds())
 }
