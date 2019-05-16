@@ -1,4 +1,4 @@
-package dpd_sandbox
+package dpd_sdk
 
 import dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-soap"
 
