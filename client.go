@@ -1,7 +1,7 @@
 package dpd_sdk
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-soap"
+	dpdSoap "dpd-soap"
 	"github.com/fiorix/wsdl2go/soap"
 )
 
@@ -38,24 +38,24 @@ type DPDClient interface {
 	getTrackingService() dpdSoap.ParcelTracing
 
 	// География DPD
-	GetParcelShops(r *parcelShopRequest) ([]*dpdSoap.ParcelShop, error)
+	GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop, error)
 	GetTerminalsSelfDelivery2() ([]*dpdSoap.TerminalSelf, error)
 	GetCitiesCashPay(countryCode string) ([]*dpdSoap.City, error)
 
 	//Калькулятор
-	GetServiceCost2(r *calculateRequest) ([]*dpdSoap.ServiceCost, error)
+	GetServiceCost2(r *CalculateRequest) ([]*dpdSoap.ServiceCost, error)
 
 	// Заказ
-	CreateOrder(r *createOrderRequest) ([]*dpdSoap.DpdOrderStatus, error)
-	AddParcels(r *updateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error)
-	RemoveParcels(r *updateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error)
-	CancelOrder(r *cancelOrderRequest) ([]*dpdSoap.DpdOrderStatus, error)
+	CreateOrder(r *CreateOrderRequest) ([]*dpdSoap.DpdOrderStatus, error)
+	AddParcels(r *UpdateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error)
+	RemoveParcels(r *UpdateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error)
+	CancelOrder(r *CancelOrderRequest) ([]*dpdSoap.DpdOrderStatus, error)
 
 	//Трекинг
 	GetStatesByClient() (*dpdSoap.StateParcels, error)
-	GetStatesByClientOrder(r *clientOrderRequest) (*dpdSoap.StateParcels, error)
-	//GetStatesByClientParcel(r clientParcelRequest)
-	GetStatesByDPDOrder(r *dpdOrderRequest) (*dpdSoap.StateParcels, error)
+	GetStatesByClientOrder(r *ClientOrderRequest) (*dpdSoap.StateParcels, error)
+	//GetStatesByClientParcel(r ClientParcelRequest)
+	GetStatesByDPDOrder(r *DpdOrderRequest) (*dpdSoap.StateParcels, error)
 
 	getAuth() *dpdSoap.Auth
 }
@@ -121,7 +121,7 @@ func (cl *dpdClient) getTrackingService() dpdSoap.ParcelTracing {
 	return cl.services.tracking
 }
 
-func (cl *dpdClient) GetParcelShops(r *parcelShopRequest) ([]*dpdSoap.ParcelShop, error) {
+func (cl *dpdClient) GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop, error) {
 	req := r.toDPDRequest()
 	req.Auth = cl.getAuth()
 	req.Ns = dpdSoap.GeographyNamespace
@@ -167,7 +167,7 @@ func (cl *dpdClient) GetCitiesCashPay(countryCode string) ([]*dpdSoap.City, erro
 	return result.Return, nil
 }
 
-func (cl *dpdClient) GetServiceCost2(r *calculateRequest) ([]*dpdSoap.ServiceCost, error) {
+func (cl *dpdClient) GetServiceCost2(r *CalculateRequest) ([]*dpdSoap.ServiceCost, error) {
 	req := r.toDpdRequest()
 	req.Auth = cl.getAuth()
 
@@ -183,7 +183,7 @@ func (cl *dpdClient) GetServiceCost2(r *calculateRequest) ([]*dpdSoap.ServiceCos
 	return result.Return, nil
 }
 
-func (cl *dpdClient) CreateOrder(r *createOrderRequest) ([]*dpdSoap.DpdOrderStatus, error) {
+func (cl *dpdClient) CreateOrder(r *CreateOrderRequest) ([]*dpdSoap.DpdOrderStatus, error) {
 	req := r.toDPDRequest()
 	req.Auth = cl.getAuth()
 
@@ -198,7 +198,7 @@ func (cl *dpdClient) CreateOrder(r *createOrderRequest) ([]*dpdSoap.DpdOrderStat
 	return result.Return, nil
 }
 
-func (cl *dpdClient) AddParcels(r *updateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error) {
+func (cl *dpdClient) AddParcels(r *UpdateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error) {
 	req := r.toDPDRequest()
 	r.Auth = cl.getAuth()
 
@@ -213,7 +213,7 @@ func (cl *dpdClient) AddParcels(r *updateOrderRequest) (*dpdSoap.DpdOrderCorrect
 	return result.Return, nil
 }
 
-func (cl *dpdClient) RemoveParcels(r *updateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error) {
+func (cl *dpdClient) RemoveParcels(r *UpdateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error) {
 	req := r.toDPDRequest()
 	r.Auth = cl.getAuth()
 
@@ -228,7 +228,7 @@ func (cl *dpdClient) RemoveParcels(r *updateOrderRequest) (*dpdSoap.DpdOrderCorr
 	return result.Return, nil
 }
 
-func (cl *dpdClient) CancelOrder(r *cancelOrderRequest) ([]*dpdSoap.DpdOrderStatus, error) {
+func (cl *dpdClient) CancelOrder(r *CancelOrderRequest) ([]*dpdSoap.DpdOrderStatus, error) {
 	req := r.toDPDRequest()
 	r.Auth = cl.getAuth()
 
@@ -257,7 +257,7 @@ func (cl *dpdClient) GetStatesByClient() (*dpdSoap.StateParcels, error) {
 	return result.Return, err
 }
 
-func (cl *dpdClient) GetStatesByClientOrder(r *clientOrderRequest) (*dpdSoap.StateParcels, error) {
+func (cl *dpdClient) GetStatesByClientOrder(r *ClientOrderRequest) (*dpdSoap.StateParcels, error) {
 	req := r.toDPDRequest()
 	req.Auth = cl.getAuth()
 
@@ -272,7 +272,7 @@ func (cl *dpdClient) GetStatesByClientOrder(r *clientOrderRequest) (*dpdSoap.Sta
 	return result.Return, nil
 }
 
-func (cl *dpdClient) GetStatesByDPDOrder(r *dpdOrderRequest) (*dpdSoap.StateParcels, error) {
+func (cl *dpdClient) GetStatesByDPDOrder(r *DpdOrderRequest) (*dpdSoap.StateParcels, error) {
 	req := r.toDPDRequest()
 	req.Auth = cl.getAuth()
 
