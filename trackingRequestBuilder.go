@@ -1,144 +1,117 @@
 package dpd_sdk
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-soap"
+	dpdSoap "dpd-soap"
 	"time"
 )
 
-type clientOrderRequest dpdSoap.RequestClientOrder
+//Запрос на трекинг по номеру заказа клиента
+type ClientOrderRequest dpdSoap.RequestClientOrder
 
-type ClientOrderRequest interface {
-	SetClientOrderNumber(number string) *clientOrderRequest
-	SetPickupDate(time time.Time) *clientOrderRequest
-
-	toDPDRequest() *dpdSoap.RequestClientOrder
+func NewClientOrderRequest() *ClientOrderRequest {
+	return new(ClientOrderRequest)
 }
 
-func NewClientOrderRequest() *clientOrderRequest {
-	return new(clientOrderRequest)
-}
-
-func (r *clientOrderRequest) SetClientOrderNumber(number string) *clientOrderRequest {
+func (r *ClientOrderRequest) SetClientOrderNumber(number string) *ClientOrderRequest {
 	r.ClientOrderNr = &number
 
 	return r
 }
 
-func (r *clientOrderRequest) SetPickupDate(time time.Time) *clientOrderRequest {
+func (r *ClientOrderRequest) SetPickupDate(time time.Time) *ClientOrderRequest {
 	d := dpdSoap.Date(time.Format("2016-01-02"))
 	r.PickupDate = &d
 
 	return r
 }
 
-func (r *clientOrderRequest) toDPDRequest() *dpdSoap.RequestClientOrder {
+func (r *ClientOrderRequest) toDPDRequest() *dpdSoap.RequestClientOrder {
 	dpdReq := dpdSoap.RequestClientOrder(*r)
 
 	return &dpdReq
 }
 
-type clientParcelRequest dpdSoap.RequestClientParcel
+//Запрос на трекинг по посылке. Посылка идентифицируется по номеру посылки в информационной системе клиента.
+type ClientParcelRequest dpdSoap.RequestClientParcel
 
-type ClientParcelRequest interface {
-	SetClientParcelNumber(number string) *clientParcelRequest
-	SetPickupDate(time time.Time) *clientParcelRequest
+func NewClientParcelRequest() *ClientParcelRequest {
+	return new(ClientParcelRequest)
 }
 
-func NewClientParcelRequest() *clientParcelRequest {
-	return new(clientParcelRequest)
-}
-
-func (r *clientParcelRequest) SetClientParcelNumber(number string) *clientParcelRequest {
+func (r *ClientParcelRequest) SetClientParcelNumber(number string) *ClientParcelRequest {
 	r.ClientParcelNr = &number
 
 	return r
 }
 
-func (r *clientParcelRequest) SetPickupDate(time time.Time) *clientParcelRequest {
+func (r *ClientParcelRequest) SetPickupDate(time time.Time) *ClientParcelRequest {
 	d := dpdSoap.Date(time.Format("2006-01-02"))
 	r.PickupDate = &d
 
 	return r
 }
 
-type dpdOrderRequest dpdSoap.RequestDpdOrder
+//Запрос на трекинг по номеру заказа DPD
+type DpdOrderRequest dpdSoap.RequestDpdOrder
 
-type DpdOrderRequest interface {
-	SetDPDOrderNumber(number string) *dpdOrderRequest
-	SetPickupYear(year int) *dpdOrderRequest
-
-	toDPDRequest() *dpdSoap.RequestDpdOrder
+func NewDpdOrderRequest() *DpdOrderRequest {
+	return new(DpdOrderRequest)
 }
 
-func NewDpdOrderRequest() *dpdOrderRequest {
-	return new(dpdOrderRequest)
-}
-
-func (r *dpdOrderRequest) SetDPDOrderNumber(number string) *dpdOrderRequest {
+func (r *DpdOrderRequest) SetDPDOrderNumber(number string) *DpdOrderRequest {
 	r.DpdOrderNr = &number
 
 	return r
 }
 
-func (r *dpdOrderRequest) SetPickupYear(year int) *dpdOrderRequest {
+func (r *DpdOrderRequest) SetPickupYear(year int) *DpdOrderRequest {
 	r.PickupYear = &year
 
 	return r
 }
 
-func (r *dpdOrderRequest) toDPDRequest() *dpdSoap.RequestDpdOrder {
+func (r *DpdOrderRequest) toDPDRequest() *dpdSoap.RequestDpdOrder {
 	dpdReq := dpdSoap.RequestDpdOrder(*r)
 
 	return &dpdReq
 }
 
-type confirmRequest dpdSoap.RequestConfirm
+// Запрос на подтверждение эвентов получених от GetEvents
+type ConfirmRequest dpdSoap.RequestConfirm
 
-type ConfirmRequest interface {
-	SetDocId(docID int64) *confirmRequest
+func NewConfirmRequest() *ConfirmRequest {
+	return new(ConfirmRequest)
 }
 
-func NewConfirmRequest() *confirmRequest {
-	return new(confirmRequest)
-}
-
-func (r *confirmRequest) SetDocId(docId int64) *confirmRequest {
+func (r *ConfirmRequest) SetDocId(docId int64) *ConfirmRequest {
 	r.DocId = &docId
 
 	return r
 }
 
-type dpdTrackingEventRequest dpdSoap.EventTrackingRequest
+type DpdTrackingEventRequest dpdSoap.EventTrackingRequest
 
-type DPDTrackingOrderRequest interface {
-	SetDateFrom(from time.Time) *dpdTrackingEventRequest
-	SetDateTo(to time.Time) *dpdTrackingEventRequest
-	SetMaxRowCount(count int) *dpdTrackingEventRequest
-
-	toDPDRequest() *dpdSoap.EventTrackingRequest
-}
-
-func (r *dpdTrackingEventRequest) SetDateFrom(from time.Time) *dpdTrackingEventRequest {
+func (r *DpdTrackingEventRequest) SetDateFrom(from time.Time) *DpdTrackingEventRequest {
 	d := dpdSoap.DateTime(from.Format("2006-01-02 15:04:05"))
 	r.DateFrom = &d
 
 	return r
 }
 
-func (r *dpdTrackingEventRequest) SetDateTo(to time.Time) *dpdTrackingEventRequest {
+func (r *DpdTrackingEventRequest) SetDateTo(to time.Time) *DpdTrackingEventRequest {
 	d := dpdSoap.DateTime(to.Format("2006-01-02 15:04:05"))
 	r.DateTo = &d
 
 	return r
 }
 
-func (r *dpdTrackingEventRequest) SetMaxRowCount(count int) *dpdTrackingEventRequest {
+func (r *DpdTrackingEventRequest) SetMaxRowCount(count int) *DpdTrackingEventRequest {
 	r.MaxRowCount = &count
 
 	return r
 }
 
-func (r *dpdTrackingEventRequest) toDPDRequest() *dpdSoap.EventTrackingRequest {
+func (r *DpdTrackingEventRequest) toDPDRequest() *dpdSoap.EventTrackingRequest {
 	dpdReq := dpdSoap.EventTrackingRequest(*r)
 
 	return &dpdReq

@@ -1,144 +1,120 @@
 package dpd_sdk
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-soap"
+	dpdSoap "dpd-soap"
 	"time"
 )
 
-type calculateRequest dpdSoap.ServiceCostRequest
-type city dpdSoap.CityRequest
+//Запрос на подсчет стоимости доставки
+type CalculateRequest dpdSoap.ServiceCostRequest
 
-type CityRequest interface {
-	SetIndex(index string) *city
-	SetCityName(name string) *city
-	SetRegionCode(code int) *city
-	SetCountryCode(code string) *city
-}
+//Адрес для подсчета стомиости доставки
+type CityRequest dpdSoap.CityRequest
 
-type CalculateRequest interface {
-	SetPickup(city *city) *calculateRequest
-	SetDelivery(city *city) *calculateRequest
-	SetWeight(weight float64) *calculateRequest
-	SetVolume(volume float64) *calculateRequest
-	SetServiceCode(code string) *calculateRequest
-	SetPickupDate(time time.Time) *calculateRequest
-	SetMaxDays(days int) *calculateRequest
-	SetMaxCost(cost float64) *calculateRequest
-	SetDeclaredValue(declaredValue float64) *calculateRequest
-	SetSelfPickup(flag bool) *calculateRequest
-	SetSelfDelivery(flag bool) *calculateRequest
-
-	toDpdRequest() *dpdSoap.ServiceCostRequest
-}
-
-func NewCity(cityId int64) *city {
-	return &city{
+func NewCity(cityId int64) *CityRequest {
+	return &CityRequest{
 		CityId: &cityId,
 	}
 }
 
-func (c *city) SetIndex(index string) *city {
+func (c *CityRequest) SetIndex(index string) *CityRequest {
 	c.Index = &index
 
 	return c
 }
 
-func (c *city) SetCityName(name string) *city {
+func (c *CityRequest) SetCityName(name string) *CityRequest {
 	c.CityName = &name
 
 	return c
 }
 
-func (c *city) SetRegionCode(code int) *city {
+func (c *CityRequest) SetRegionCode(code int) *CityRequest {
 	c.RegionCode = &code
 
 	return c
 }
 
-func (c *city) SetCountryCode(code string) *city {
+func (c *CityRequest) SetCountryCode(code string) *CityRequest {
 	c.CountryCode = &code
 
 	return c
 }
 
-func NewCalculateRequest() *calculateRequest {
-	return &calculateRequest{}
+func NewCalculateRequest() *CalculateRequest {
+	return &CalculateRequest{}
 }
 
-func (r *calculateRequest) Request() *calculateRequest {
-	return r
-}
-
-func (r *calculateRequest) SetPickup(city *city) *calculateRequest {
+func (r *CalculateRequest) SetPickup(city *CityRequest) *CalculateRequest {
 	dpdCityRequest := dpdSoap.CityRequest(*city)
 	r.Pickup = &dpdCityRequest
 
 	return r
 }
 
-func (r *calculateRequest) SetDelivery(city *city) *calculateRequest {
+func (r *CalculateRequest) SetDelivery(city *CityRequest) *CalculateRequest {
 	delivery := dpdSoap.CityRequest(*city)
 	r.Delivery = &delivery
 
 	return r
 }
 
-func (r *calculateRequest) SetWeight(weight float64) *calculateRequest {
+func (r *CalculateRequest) SetWeight(weight float64) *CalculateRequest {
 	r.Weight = &weight
 
 	return r
 }
 
-func (r *calculateRequest) SetVolume(volume float64) *calculateRequest {
+func (r *CalculateRequest) SetVolume(volume float64) *CalculateRequest {
 	r.Volume = &volume
 
 	return r
 }
 
-func (r *calculateRequest) SetServiceCode(code string) *calculateRequest {
+func (r *CalculateRequest) SetServiceCode(code string) *CalculateRequest {
 	r.ServiceCode = &code
 
 	return r
 }
 
-func (r *calculateRequest) SetPickupDate(time time.Time) *calculateRequest {
+func (r *CalculateRequest) SetPickupDate(time time.Time) *CalculateRequest {
 	d := dpdSoap.Date(time.Format("2006-01-02"))
 	r.PickupDate = &d
 
 	return r
 }
 
-func (r *calculateRequest) SetMaxDays(days int) *calculateRequest {
+func (r *CalculateRequest) SetMaxDays(days int) *CalculateRequest {
 	r.MaxDays = &days
 
 	return r
 }
 
-func (r *calculateRequest) SetMaxCost(cost float64) *calculateRequest {
+func (r *CalculateRequest) SetMaxCost(cost float64) *CalculateRequest {
 	r.MaxCost = &cost
 
 	return r
 }
 
-func (r *calculateRequest) SetDeclaredValue(declaredValue float64) *calculateRequest {
+func (r *CalculateRequest) SetDeclaredValue(declaredValue float64) *CalculateRequest {
 	r.DeclaredValue = &declaredValue
 
 	return r
 }
 
-func (r *calculateRequest) toDpdRequest() *dpdSoap.ServiceCostRequest {
+func (r *CalculateRequest) toDpdRequest() *dpdSoap.ServiceCostRequest {
 	dpdReq := dpdSoap.ServiceCostRequest(*r)
 
 	return &dpdReq
 }
 
-func (r *calculateRequest) SetSelfPickup(flag bool) *calculateRequest {
+func (r *CalculateRequest) SetSelfPickup(flag bool) *CalculateRequest {
 	r.SelfPickup = &flag
 
 	return r
 }
 
-func (r *calculateRequest) SetSelfDelivery(flag bool) *calculateRequest {
+func (r *CalculateRequest) SetSelfDelivery(flag bool) *CalculateRequest {
 	r.SelfDelivery = &flag
 
 	return r
