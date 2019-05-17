@@ -1,22 +1,26 @@
-package dpd_sdk
+package dpd
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-sdk/dpd-soap"
+	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd/soap"
 	"github.com/fiorix/wsdl2go/soap"
 )
 
+//Client to call DPD SOAP api methods
+//
+//Names of functions equals original DPD SOAP methods names
 type DPDClient struct {
-	auth        DPDAuth
-	countryCode string
-	urls        DPDUrls
-	services    *services
+	auth     DPDAuth
+	urls     DPDUrls
+	services *services
 }
 
+//DPD authorization
 type DPDAuth struct {
 	ClientNumber int64
 	ClientKey    string
 }
 
+//URLs of DPD services
 type DPDUrls struct {
 	CalculatorUrl string
 	GeographyUrl  string
@@ -31,12 +35,12 @@ type services struct {
 	tracking   dpdSoap.ParcelTracing
 }
 
-func NewDPDClient(auth DPDAuth, urls DPDUrls, countryCode string) *DPDClient {
+//Creates new client
+func NewDPDClient(auth DPDAuth, urls DPDUrls) *DPDClient {
 	return &DPDClient{
-		auth:        auth,
-		urls:        urls,
-		countryCode: countryCode,
-		services:    &services{},
+		auth:     auth,
+		urls:     urls,
+		services: &services{},
 	}
 }
 
@@ -92,6 +96,7 @@ func (cl *DPDClient) getTrackingService() dpdSoap.ParcelTracing {
 	return cl.services.tracking
 }
 
+//Get list of pickup/delivery points with restrictions about weight and dimensions
 func (cl *DPDClient) GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop, error) {
 	req := r.toDPDRequest()
 	req.Auth = cl.getAuth()
@@ -109,6 +114,7 @@ func (cl *DPDClient) GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop
 	return result.Return.ParcelShop, nil
 }
 
+//Get terminals list. They don't have any restrictions
 func (cl *DPDClient) GetTerminalsSelfDelivery2() ([]*dpdSoap.TerminalSelf, error) {
 	result, err := cl.getGeographyService().GetTerminalsSelfDelivery2(&dpdSoap.GetTerminalsSelfDelivery2{
 		Ns:   dpdSoap.GeographyNamespace,
@@ -122,6 +128,9 @@ func (cl *DPDClient) GetTerminalsSelfDelivery2() ([]*dpdSoap.TerminalSelf, error
 	return result.Return.Terminal, nil
 }
 
+//Set country code according ISO 3166-1 alpha-2 standard
+//
+//https://www.iso.org/obp/ui/#search
 func (cl *DPDClient) GetCitiesCashPay(countryCode string) ([]*dpdSoap.City, error) {
 	result, err := cl.getGeographyService().GetCitiesCashPay(&dpdSoap.GetCitiesCashPay{
 		NS: dpdSoap.GeographyNamespace,
@@ -138,6 +147,7 @@ func (cl *DPDClient) GetCitiesCashPay(countryCode string) ([]*dpdSoap.City, erro
 	return result.Return, nil
 }
 
+//Calculate cost of delivery for Russia and Customs Union
 func (cl *DPDClient) GetServiceCost2(r *CalculateRequest) ([]*dpdSoap.ServiceCost, error) {
 	req := r.toDpdRequest()
 	req.Auth = cl.getAuth()
@@ -169,6 +179,7 @@ func (cl *DPDClient) CreateOrder(r *CreateOrderRequest) ([]*dpdSoap.DpdOrderStat
 	return result.Return, nil
 }
 
+//Change order. Add parcels to order
 func (cl *DPDClient) AddParcels(r *UpdateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error) {
 	req := r.toDPDRequest()
 	r.Auth = cl.getAuth()
@@ -184,6 +195,7 @@ func (cl *DPDClient) AddParcels(r *UpdateOrderRequest) (*dpdSoap.DpdOrderCorrect
 	return result.Return, nil
 }
 
+//Change order. Remove parcels from order
 func (cl *DPDClient) RemoveParcels(r *UpdateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error) {
 	req := r.toDPDRequest()
 	r.Auth = cl.getAuth()
@@ -214,6 +226,7 @@ func (cl *DPDClient) CancelOrder(r *CancelOrderRequest) ([]*dpdSoap.DpdOrderStat
 	return result.Return, nil
 }
 
+//Return all parcels statuses that changed after last request
 func (cl *DPDClient) GetStatesByClient() (*dpdSoap.StateParcels, error) {
 	result, err := cl.getTrackingService().GetStatesByClient(&dpdSoap.GetStatesByClient{
 		Request: &dpdSoap.RequestClient{
@@ -228,6 +241,8 @@ func (cl *DPDClient) GetStatesByClient() (*dpdSoap.StateParcels, error) {
 	return result.Return, err
 }
 
+//Get list of states for all parcels for specified order
+//Order identify by client side order number
 func (cl *DPDClient) GetStatesByClientOrder(r *ClientOrderRequest) (*dpdSoap.StateParcels, error) {
 	req := r.toDPDRequest()
 	req.Auth = cl.getAuth()
@@ -243,6 +258,8 @@ func (cl *DPDClient) GetStatesByClientOrder(r *ClientOrderRequest) (*dpdSoap.Sta
 	return result.Return, nil
 }
 
+//Get states history for specified parcel
+//Parcel identify by client side parcel number
 func (cl *DPDClient) GetStatesByDPDOrder(r *DpdOrderRequest) (*dpdSoap.StateParcels, error) {
 	req := r.toDPDRequest()
 	req.Auth = cl.getAuth()

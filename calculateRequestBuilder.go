@@ -1,16 +1,18 @@
-package dpd_sdk
+package dpd
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-sdk/dpd-soap"
 	"time"
+
+	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd/soap"
 )
 
-//Запрос на подсчет стоимости доставки
+//Request of calculate delivery cost
 type CalculateRequest dpdSoap.ServiceCostRequest
 
-//Адрес для подсчета стомиости доставки
+//Address for calculate request
 type CityRequest dpdSoap.CityRequest
 
+//Dpd native, city identifier
 func NewCity(cityId int64) *CityRequest {
 	return &CityRequest{
 		CityId: &cityId,
@@ -35,24 +37,42 @@ func (c *CityRequest) SetRegionCode(code int) *CityRequest {
 	return c
 }
 
+//Set country code according ISO 3166-1 alpha-2 standard
+//
+//https://www.iso.org/obp/ui/#search
+//
+//If omitted, default RU
 func (c *CityRequest) SetCountryCode(code string) *CityRequest {
 	c.CountryCode = &code
 
 	return c
 }
 
-func NewCalculateRequest() *CalculateRequest {
-	return &CalculateRequest{}
+func NewCalculateRequest(from, to *CityRequest, weight float64, selfPickup, selfDelivery bool) *CalculateRequest {
+	req := new(CalculateRequest)
+
+	dpdFrom := dpdSoap.CityRequest(*from)
+	dpdTo := dpdSoap.CityRequest(*to)
+
+	req.Pickup = &dpdFrom
+	req.Delivery = &dpdTo
+	req.Weight = &weight
+	req.SelfPickup = &selfPickup
+	req.SelfDelivery = &selfDelivery
+
+	return req
 }
 
-func (r *CalculateRequest) SetPickup(city *CityRequest) *CalculateRequest {
+//Set pickup address
+func (r *CalculateRequest) OverridePickup(city *CityRequest) *CalculateRequest {
 	dpdCityRequest := dpdSoap.CityRequest(*city)
 	r.Pickup = &dpdCityRequest
 
 	return r
 }
 
-func (r *CalculateRequest) SetDelivery(city *CityRequest) *CalculateRequest {
+//Set delivery address
+func (r *CalculateRequest) OverrideDelivery(city *CityRequest) *CalculateRequest {
 	delivery := dpdSoap.CityRequest(*city)
 	r.Delivery = &delivery
 
@@ -71,12 +91,16 @@ func (r *CalculateRequest) SetVolume(volume float64) *CalculateRequest {
 	return r
 }
 
+//List of services codes.
+//If set, DPD service will return cost only for given service codes
+//code - list of codes, comma separated
 func (r *CalculateRequest) SetServiceCode(code string) *CalculateRequest {
 	r.ServiceCode = &code
 
 	return r
 }
 
+//If not set DPD use current date by default
 func (r *CalculateRequest) SetPickupDate(time time.Time) *CalculateRequest {
 	d := dpdSoap.Date(time.Format("2006-01-02"))
 	r.PickupDate = &d
@@ -84,12 +108,16 @@ func (r *CalculateRequest) SetPickupDate(time time.Time) *CalculateRequest {
 	return r
 }
 
+//If specific service is set up for request, call of this function with any parameter
+//has not affect result of request
 func (r *CalculateRequest) SetMaxDays(days int) *CalculateRequest {
 	r.MaxDays = &days
 
 	return r
 }
 
+//If specific service is set up for request, call of this function with any parameter
+//has not affect result of request
 func (r *CalculateRequest) SetMaxCost(cost float64) *CalculateRequest {
 	r.MaxCost = &cost
 
@@ -108,12 +136,14 @@ func (r *CalculateRequest) toDpdRequest() *dpdSoap.ServiceCostRequest {
 	return &dpdReq
 }
 
+//Set client-side delivery to DPD terminal
 func (r *CalculateRequest) SetSelfPickup(flag bool) *CalculateRequest {
 	r.SelfPickup = &flag
 
 	return r
 }
 
+//Set DPD-side delivery to their terminal and customer-side pickup on DPD terminal (o_O)
 func (r *CalculateRequest) SetSelfDelivery(flag bool) *CalculateRequest {
 	r.SelfDelivery = &flag
 

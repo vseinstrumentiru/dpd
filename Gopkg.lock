@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:4186e22b6565a577bc1df73c9e91e9f4ad4a48b89ed4f4560c64d71ae0a313f6"
-  name = "git.vseinstrumenti.net/golang-sandbox/dpd-sdk"
-  packages = ["dpd-soap"]
-  pruneopts = "UT"
-  revision = "9cbf30e323715760480194d73dfbe10cd92ba26c"
-
-[[projects]]
   digest = "1:95228f0b554a6049b807ad87bd658b646886883bf024f4eceb46c6718a03d7ed"
   name = "github.com/fiorix/wsdl2go"
   packages = ["soap"]
@@ -20,9 +12,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "git.vseinstrumenti.net/golang-sandbox/dpd-sdk/dpd-soap",
-    "github.com/fiorix/wsdl2go/soap",
-  ]
+  input-imports = ["github.com/fiorix/wsdl2go/soap"]
   solver-name = "gps-cdcl"
   solver-version = 1

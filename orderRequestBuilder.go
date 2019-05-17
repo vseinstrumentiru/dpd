@@ -1,7 +1,7 @@
-package dpd_sdk
+package dpd
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-sdk/dpd-soap"
+	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd/soap"
 	"time"
 )
 
@@ -13,7 +13,14 @@ type ExtraService dpdSoap.OrderExtraService
 type UnitLoad dpdSoap.UnitLoad
 
 func NewCreateOrderRequest() *CreateOrderRequest {
-	return new(CreateOrderRequest)
+	var orders []*dpdSoap.Order
+
+	req := &CreateOrderRequest{
+		Header: &dpdSoap.Header{},
+		Order:  orders,
+	}
+
+	return req
 }
 
 func (r *CreateOrderRequest) SetDatePickup(time time.Time) *CreateOrderRequest {
@@ -64,7 +71,17 @@ func (r *CreateOrderRequest) toDPDRequest() *dpdSoap.DpdOrdersData {
 type Order dpdSoap.Order
 
 func NewOrder() *Order {
-	return new(Order)
+	var parcel []*dpdSoap.Parcel
+	var extraService []*dpdSoap.OrderExtraService
+	var extraParameter []*dpdSoap.Parameter
+	var unitLoad []*dpdSoap.UnitLoad
+
+	return &Order{
+		ExtraParam:   extraParameter,
+		ExtraService: extraService,
+		Parcel:       parcel,
+		UnitLoad:     unitLoad,
+	}
 }
 
 func (o *Order) SetInternalOrderNumber(number string) *Order {
@@ -199,7 +216,7 @@ func (a *Address) SetTerminalCode(code string) *Address {
 	return a
 }
 
-func (a *Address) SetAddressStr(address string) *Address {
+func (a *Address) SetAddressString(address string) *Address {
 	a.AddressString = &address
 
 	return a
@@ -247,8 +264,8 @@ func (a *Address) SetHouse(house string) *Address {
 	return a
 }
 
-func (a *Address) SetHousing(abbr string) *Address {
-	a.StreetAbbr = &abbr
+func (a *Address) SetHousing(housing string) *Address {
+	a.HouseKorpus = &housing
 
 	return a
 }
@@ -406,6 +423,11 @@ func (p *Parcel) SetCodAmount(amount float64) *Parcel {
 type UpdateOrderRequest dpdSoap.DpdOrderCorrection
 
 func NewUpdateOrderRequest() *UpdateOrderRequest {
+	var parcels []*dpdSoap.Parcel
+
+	req := new(UpdateOrderRequest)
+	req.Parcel = parcels
+
 	return new(UpdateOrderRequest)
 }
 
@@ -483,7 +505,7 @@ func (o *Order2Cancel) SetDPDOrderNumber(number string) *Order2Cancel {
 }
 
 func (o *Order2Cancel) SetPickupDate(time time.Time) *Order2Cancel {
-	d := dpdSoap.Date(time.Format("2016-01-02"))
+	d := dpdSoap.Date(time.Format("2006-01-02"))
 	o.Pickupdate = &d
 
 	return o
@@ -492,7 +514,12 @@ func (o *Order2Cancel) SetPickupDate(time time.Time) *Order2Cancel {
 type CancelOrderRequest dpdSoap.DpdOrderCancellation
 
 func NewCancelOrderRequest() *CancelOrderRequest {
-	return new(CancelOrderRequest)
+	var orders []*dpdSoap.OrderCancel
+
+	req := new(CancelOrderRequest)
+	req.Cancel = orders
+
+	return req
 }
 
 func (r *CancelOrderRequest) AddOrder(order *Order2Cancel) *CancelOrderRequest {

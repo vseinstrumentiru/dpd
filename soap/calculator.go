@@ -1,4 +1,4 @@
-package dpd_soap
+package soap
 
 import "github.com/fiorix/wsdl2go/soap"
 

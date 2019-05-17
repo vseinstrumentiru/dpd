@@ -1,14 +1,17 @@
-package dpd_sdk
+package dpd
 
-import dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-sdk/dpd-soap"
+import dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd/soap"
 
-//Запрос на получение списка точек самовывоза с ограничениями
+//Request list of self delivery points with their restrictions
 type ParcelShopRequest dpdSoap.DpdParcelShopRequest
 
 func NewParcelShopRequest() *ParcelShopRequest {
 	return new(ParcelShopRequest)
 }
 
+//Set country code according ISO 3166-1 alpha-2 standard
+//https://www.iso.org/obp/ui/#search
+//If omitted, default RU
 func (r *ParcelShopRequest) SetCountryCode(code string) *ParcelShopRequest {
 	r.CountryCode = &code
 
@@ -21,6 +24,7 @@ func (r *ParcelShopRequest) SetRegionCode(code string) *ParcelShopRequest {
 	return r
 }
 
+//Dpd native, city identifier
 func (r *ParcelShopRequest) SetCityCode(code string) *ParcelShopRequest {
 	r.CityCode = &code
 
