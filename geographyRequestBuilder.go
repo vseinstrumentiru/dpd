@@ -1,6 +1,6 @@
 package dpd_sdk
 
-import dpdSoap "dpd-soap"
+import dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-sdk/dpd-soap"
 
 //Запрос на получение списка точек самовывоза с ограничениями
 type ParcelShopRequest dpdSoap.DpdParcelShopRequest

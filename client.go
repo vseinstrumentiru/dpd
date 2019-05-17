@@ -1,7 +1,7 @@
 package dpd_sdk
 
 import (
-	dpdSoap "dpd-soap"
+	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-sdk/dpd-soap"
 	"github.com/fiorix/wsdl2go/soap"
 )
 
