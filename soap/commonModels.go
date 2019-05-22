@@ -1,4 +1,4 @@
-package dpd_soap
+package soap
 
 type Date string
 

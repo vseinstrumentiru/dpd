@@ -1,7 +1,7 @@
-package dpd_sdk
+package dpd
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd-sdk/dpd-soap"
+	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd/soap"
 	"time"
 )
 
@@ -19,7 +19,7 @@ func (r *ClientOrderRequest) SetClientOrderNumber(number string) *ClientOrderReq
 }
 
 func (r *ClientOrderRequest) SetPickupDate(time time.Time) *ClientOrderRequest {
-	d := dpdSoap.Date(time.Format("2016-01-02"))
+	d := dpdSoap.Date(time.Format("2006-01-02"))
 	r.PickupDate = &d
 
 	return r
