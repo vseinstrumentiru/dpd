@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd/soap"
+	dpdSoap "git.vseinstrumenti.net/golang/dpd/soap"
 )
 
 func TestNewParcelShopRequest(t *testing.T) {

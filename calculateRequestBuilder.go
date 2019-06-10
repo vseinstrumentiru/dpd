@@ -3,7 +3,7 @@ package dpd
 import (
 	"time"
 
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd/soap"
+	dpdSoap "git.vseinstrumenti.net/golang/dpd/soap"
 )
 
 //Request of calculate delivery cost

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	dpdSoap "git.vseinstrumenti.net/golang-sandbox/dpd/soap"
+	dpdSoap "git.vseinstrumenti.net/golang/dpd/soap"
 )
 
 func TestNewCity(t *testing.T) {
