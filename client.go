@@ -104,7 +104,7 @@ func (cl *DPDClient) GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop
 
 	result, err := cl.getGeographyService().GetParcelShops(&dpdSoap.GetParcelShops{
 		Request: req,
-		//Ns:      dpdSoap.GeographyNamespace,
+		Ns:      "",
 	})
 
 	if err != nil {
