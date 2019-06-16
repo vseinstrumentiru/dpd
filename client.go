@@ -100,11 +100,11 @@ func (cl *DPDClient) getTrackingService() dpdSoap.ParcelTracing {
 func (cl *DPDClient) GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop, error) {
 	req := r.toDPDRequest()
 	req.Auth = cl.getAuth()
-	req.Ns = dpdSoap.GeographyNamespace
+	req.Ns = ""
 
 	result, err := cl.getGeographyService().GetParcelShops(&dpdSoap.GetParcelShops{
 		Request: req,
-		Ns:      "",
+		Ns:      dpdSoap.GeographyNamespace,
 	})
 
 	if err != nil {
