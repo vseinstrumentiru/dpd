@@ -116,9 +116,12 @@ func (cl *DPDClient) GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop
 
 //Get terminals list. They don't have any restrictions
 func (cl *DPDClient) GetTerminalsSelfDelivery2() ([]*dpdSoap.TerminalSelf, error) {
+	auth := cl.getAuth()
+	auth.Ns = new(string)
+
 	result, err := cl.getGeographyService().GetTerminalsSelfDelivery2(&dpdSoap.GetTerminalsSelfDelivery2{
 		Ns:   dpdSoap.GeographyNamespace,
-		Auth: cl.getAuth(),
+		Auth: auth,
 	})
 
 	if err != nil {
