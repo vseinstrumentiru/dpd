@@ -44,6 +44,10 @@ func NewDPDClient(auth DPDAuth, urls DPDUrls) *DPDClient {
 	}
 }
 
+const (
+	ScehduleSelfDelivery = "SelfDelivery"
+)
+
 func (cl *DPDClient) getGeographyService() dpdSoap.DPDGeography2 {
 	if cl.services.geography == nil {
 		client := soap.Client{
