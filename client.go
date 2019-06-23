@@ -2,7 +2,7 @@ package dpd
 
 import (
 	"github.com/fiorix/wsdl2go/soap"
-	dpdSoap "github.com/seacomandor/dpd/soap"
+	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 //Client to call DPD SOAP api methods
