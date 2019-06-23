@@ -1,13 +1,13 @@
 package dpd
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang/dpd/soap"
 	"github.com/fiorix/wsdl2go/soap"
+	dpdSoap "github.com/seacomandor/dpd/soap"
 )
 
 //Client to call DPD SOAP api methods
 //
-//Names of functions equals original DPD SOAP methods names
+//Names of functions are equals original DPD SOAP methods names
 type DPDClient struct {
 	auth     DPDAuth
 	urls     DPDUrls

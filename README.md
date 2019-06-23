@@ -1,6 +1,6 @@
 # SDK для интеграции с SOAP сервисами транспортной компании DPD
 
-Road map
+Roadmap
 - [ ] Web служба "Георгафия DPD"
   - [X] getCitiesCashPay
   - [X] getParcelShops

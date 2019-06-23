@@ -1,11 +1,12 @@
 package dpd
 
 import (
-	"github.com/fiorix/wsdl2go/soap"
 	"reflect"
 	"testing"
 
-	dpdSoap "git.vseinstrumenti.net/golang/dpd/soap"
+	"github.com/fiorix/wsdl2go/soap"
+
+	dpdSoap "github.com/seacomandor/dpd/soap"
 )
 
 func ExampleNewDPDClient() {
