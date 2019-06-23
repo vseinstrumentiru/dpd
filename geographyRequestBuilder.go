@@ -1,6 +1,6 @@
 package dpd
 
-import dpdSoap "git.vseinstrumenti.net/golang/dpd/soap"
+import dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 
 //Request list of self delivery points with their restrictions
 type ParcelShopRequest dpdSoap.DpdParcelShopRequest

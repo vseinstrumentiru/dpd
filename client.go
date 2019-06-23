@@ -1,13 +1,13 @@
 package dpd
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang/dpd/soap"
 	"github.com/fiorix/wsdl2go/soap"
+	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 //Client to call DPD SOAP api methods
 //
-//Names of functions equals original DPD SOAP methods names
+//Names of functions are equals original DPD SOAP methods names
 type DPDClient struct {
 	auth     DPDAuth
 	urls     DPDUrls
@@ -43,6 +43,10 @@ func NewDPDClient(auth DPDAuth, urls DPDUrls) *DPDClient {
 		services: &services{},
 	}
 }
+
+const (
+	ScehduleSelfDelivery = "SelfDelivery"
+)
 
 func (cl *DPDClient) getGeographyService() dpdSoap.DPDGeography2 {
 	if cl.services.geography == nil {
@@ -100,7 +104,7 @@ func (cl *DPDClient) getTrackingService() dpdSoap.ParcelTracing {
 func (cl *DPDClient) GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop, error) {
 	req := r.toDPDRequest()
 	req.Auth = cl.getAuth()
-	req.Ns = dpdSoap.GeographyNamespace
+	req.Ns = ""
 
 	result, err := cl.getGeographyService().GetParcelShops(&dpdSoap.GetParcelShops{
 		Request: req,
@@ -116,9 +120,12 @@ func (cl *DPDClient) GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop
 
 //Get terminals list. They don't have any restrictions
 func (cl *DPDClient) GetTerminalsSelfDelivery2() ([]*dpdSoap.TerminalSelf, error) {
+	auth := cl.getAuth()
+	auth.Ns = new(string)
+
 	result, err := cl.getGeographyService().GetTerminalsSelfDelivery2(&dpdSoap.GetTerminalsSelfDelivery2{
 		Ns:   dpdSoap.GeographyNamespace,
-		Auth: cl.getAuth(),
+		Auth: auth,
 	})
 
 	if err != nil {

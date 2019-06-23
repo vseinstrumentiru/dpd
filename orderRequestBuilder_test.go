@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	dpdSoap "git.vseinstrumenti.net/golang/dpd/soap"
+	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 func createEmptyOrderRequest() *CreateOrderRequest {

@@ -1,8 +1,9 @@
 package dpd
 
 import (
-	dpdSoap "git.vseinstrumenti.net/golang/dpd/soap"
 	"time"
+
+	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 //Запрос на трекинг по номеру заказа клиента

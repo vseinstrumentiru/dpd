@@ -1,6 +1,7 @@
-# SDK для интеграции с SOAP сервисами транспортной компании DPD
+ # SDK для интеграции с SOAP сервисами транспортной компании DPD
+[![GoDoc reference](https://godoc.org/github.com/vseinstrumentiru/dpd?status.svg)](https://godoc.org/github.com/vseinstrumentiru/dpd) 
 
-Road map
+Roadmap
 - [ ] Web служба "Георгафия DPD"
   - [X] getCitiesCashPay
   - [X] getParcelShops
@@ -27,7 +28,7 @@ Road map
   - [X] cancelOrder
 - [ ] Web служба "Отслеживание статуса"
   - [X] getStatesByClient
-  - [X] getStatesByClientOrder
+  - [X] getStatesByClientOrder§
   - [ ] confirm
   - [ ] getStatesByClientParcel
   - [X] getStatesByDPDOrders
