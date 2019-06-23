@@ -1,4 +1,5 @@
-# SDK для интеграции с SOAP сервисами транспортной компании DPD
+ # SDK для интеграции с SOAP сервисами транспортной компании DPD
+[![Build Status](https://travis-ci.com/seacomandor/dpd.svg?branch=master)](https://travis-ci.com/seacomandor/dpd) [![Coverage Status](https://coveralls.io/repos/github/seacomandor/dpd/badge.svg?branch=master)](https://coveralls.io/github/seacomandor/dpd?branch=master) 
 
 Roadmap
 - [ ] Web служба "Георгафия DPD"
@@ -27,7 +28,7 @@ Roadmap
   - [X] cancelOrder
 - [ ] Web служба "Отслеживание статуса"
   - [X] getStatesByClient
-  - [X] getStatesByClientOrder
+  - [X] getStatesByClientOrder§
   - [ ] confirm
   - [ ] getStatesByClientParcel
   - [X] getStatesByDPDOrders
