@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	dpdSoap "github.com/seacomandor/dpd/soap"
+	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 func TestNewClientOrderRequest(t *testing.T) {

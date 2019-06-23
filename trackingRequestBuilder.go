@@ -3,7 +3,7 @@ package dpd
 import (
 	"time"
 
-	dpdSoap "github.com/seacomandor/dpd/soap"
+	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 //Запрос на трекинг по номеру заказа клиента
