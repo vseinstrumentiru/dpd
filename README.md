@@ -1,5 +1,6 @@
  # SDK для интеграции с SOAP сервисами транспортной компании DPD
-[![Build Status](https://travis-ci.com/seacomandor/dpd.svg?branch=master)](https://travis-ci.com/seacomandor/dpd) [![Coverage Status](https://coveralls.io/repos/github/seacomandor/dpd/badge.svg?branch=master)](https://coveralls.io/github/seacomandor/dpd?branch=master) 
+[![Build Status](https://travis-ci.com/seacomandor/dpd.svg?branch=master)](https://travis-ci.com/seacomandor/dpd) 
+[![Coverage Status](https://coveralls.io/repos/github/seacomandor/dpd/badge.svg?branch=master)](https://coveralls.io/github/seacomandor/dpd?branch=master) 
 [![GoDoc reference](https://godoc.org/github.com/seacomandor/dpd?status.svg)](https://godoc.org/github.com/seacomandor/dpd) 
 
 Roadmap
