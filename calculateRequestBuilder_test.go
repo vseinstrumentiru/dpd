@@ -5,13 +5,11 @@ import (
 	"strconv"
 	"testing"
 	"time"
-
-	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 func TestNewCity(t *testing.T) {
 	type args struct {
-		cityId int64
+		cityID int64
 	}
 
 	var cityID int64 = 234
@@ -24,16 +22,17 @@ func TestNewCity(t *testing.T) {
 		{
 			"City " + strconv.Itoa(int(cityID)),
 			args{
-				cityId: cityID,
+				cityID: cityID,
 			},
 			&CityRequest{
-				CityId: &cityID,
+				CityID: &cityID,
 			},
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewCity(tt.args.cityId); !reflect.DeepEqual(got, tt.want) {
+			if got := NewCity(tt.args.cityID); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewCity() = %v, want %v", got, tt.want)
 			}
 		})
@@ -65,6 +64,7 @@ func TestCityRequest_SetIndex(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.c.SetIndex(tt.args.index); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CityRequest.SetIndex() = %v, want %v", got, tt.want)
@@ -187,9 +187,6 @@ func TestNewCalculateRequest(t *testing.T) {
 	selfPickup := false
 	selfDelivery := false
 
-	dpdFrom := dpdSoap.CityRequest(*from)
-	dpdTo := dpdSoap.CityRequest(*to)
-
 	tests := []struct {
 		name string
 		args args
@@ -205,8 +202,8 @@ func TestNewCalculateRequest(t *testing.T) {
 				selfDelivery,
 			},
 			&CalculateRequest{
-				Pickup:       &dpdFrom,
-				Delivery:     &dpdTo,
+				Pickup:       from,
+				Delivery:     to,
 				Weight:       &weight,
 				SelfPickup:   &selfPickup,
 				SelfDelivery: &selfDelivery,
@@ -215,7 +212,13 @@ func TestNewCalculateRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewCalculateRequest(tt.args.from, tt.args.to, tt.args.weight, tt.args.selfPickup, tt.args.selfDelivery); !reflect.DeepEqual(got, tt.want) {
+			if got := NewCalculateRequest(
+				tt.args.from,
+				tt.args.to,
+				tt.args.weight,
+				tt.args.selfPickup,
+				tt.args.selfDelivery,
+			); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewCalculateRequest() = %v, want %v", got, tt.want)
 			}
 		})
@@ -228,7 +231,6 @@ func TestCalculateRequest_SetPickup(t *testing.T) {
 	}
 
 	cityRequest := NewCity(123)
-	dpdReq := dpdSoap.CityRequest(*cityRequest)
 
 	tests := []struct {
 		name string
@@ -243,15 +245,15 @@ func TestCalculateRequest_SetPickup(t *testing.T) {
 				cityRequest,
 			},
 			&CalculateRequest{
-				Pickup: &dpdReq,
+				Pickup: cityRequest,
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.OverridePickup(tt.args.city); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CalculateRequest.OverridePickup() = %v, want %v", got, tt.want)
+			if got := tt.r.OverrideFrom(tt.args.city); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CalculateRequest.OverrideFrom() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -263,7 +265,6 @@ func TestCalculateRequest_SetDelivery(t *testing.T) {
 	}
 
 	cityRequest := NewCity(123)
-	dpdReq := dpdSoap.CityRequest(*cityRequest)
 
 	tests := []struct {
 		name string
@@ -278,15 +279,15 @@ func TestCalculateRequest_SetDelivery(t *testing.T) {
 				cityRequest,
 			},
 			&CalculateRequest{
-				Delivery: &dpdReq,
+				Delivery: cityRequest,
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.OverrideDelivery(tt.args.city); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CalculateRequest.OverrideDelivery() = %v, want %v", got, tt.want)
+			if got := tt.r.OverrideTo(tt.args.city); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CalculateRequest.OverrideTo() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -397,7 +398,7 @@ func TestCalculateRequest_SetPickupDate(t *testing.T) {
 	}
 
 	currentTime := time.Now()
-	dpdDate := dpdSoap.Date(currentTime.Format("2006-01-02"))
+	dpdDate := currentTime.Format("2006-01-02")
 
 	tests := []struct {
 		name string
@@ -519,27 +520,6 @@ func TestCalculateRequest_SetDeclaredValue(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.r.SetDeclaredValue(tt.args.declaredValue); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CalculateRequest.SetDeclaredValue() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestCalculateRequest_toDpdRequest(t *testing.T) {
-	tests := []struct {
-		name string
-		r    *CalculateRequest
-		want *dpdSoap.ServiceCostRequest
-	}{
-		{
-			"To dpd request",
-			&CalculateRequest{},
-			&dpdSoap.ServiceCostRequest{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.toDpdRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CalculateRequest.toDpdRequest() = %v, want %v", got, tt.want)
 			}
 		})
 	}

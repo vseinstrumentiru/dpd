@@ -14,7 +14,7 @@ Roadmap
   - [ ] getServiceCostInternational  
 - [ ] Web служба "Создание заказа"
   - [X] createOrder
-  - [ ] getOrderStatus
+  - [x] getOrderStatus
   - [ ] createAddress
   - [ ] updateAddress
   - [ ] getInvoiceFile
@@ -46,18 +46,13 @@ Roadmap
 ## Пример использования
 
 ```go
-dpdClient := dpdSdk.NewDPDClient(
-    dpdSdk.DPDAuth{
-        ClientNumber: client number,
-        ClientKey: client key ,
-    },
-    dpdSdk.DPDUrls{
+dpdClient := dpdSdk.NewDPDClient(clinetNumber, clientKey
+    ServiceUrls{
         GeographyUrl:  "http://wstest.dpd.ru/services/geography2",
-        OrderUrl:      "http://wstest.dpd.ru/services/order",
+        OrderUrl:      "http://wstest.dpd.ru/services/order2",
         CalculatorUrl: "http://wstest.dpd.ru/services/calculator2",
-        TrackingUrl:   "http://wstest.dpd.ru:80/services/tracing",
+        TrackingUrl:   "http://wstest.dpd.ru/services/tracing",
     },
-    "RU",
 )
 
 

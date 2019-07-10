@@ -2,80 +2,69 @@ package dpd
 
 import (
 	"time"
-
-	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
-// Запрос на создание заказа
-type CreateOrderRequest dpdSoap.DpdOrdersData
-
-type ExtraParameter dpdSoap.Parameter
-type ExtraService dpdSoap.OrderExtraService
-type UnitLoad dpdSoap.UnitLoad
-
+//NewCreateOrderRequest ...
 func NewCreateOrderRequest() *CreateOrderRequest {
-	var orders []*dpdSoap.Order
+	var orders []*Order
 
 	req := &CreateOrderRequest{
-		Header: &dpdSoap.Header{},
+		Header: &Header{},
 		Order:  orders,
 	}
 
 	return req
 }
 
+//SetDatePickup ...
 func (r *CreateOrderRequest) SetDatePickup(time time.Time) *CreateOrderRequest {
-	d := dpdSoap.Date(time.Format("2006-01-02"))
+	d := time.Format("2006-01-02")
 	r.Header.DatePickup = &d
 
 	return r
 }
 
+//SetPayer ...
 func (r *CreateOrderRequest) SetPayer(payer int64) *CreateOrderRequest {
 	r.Header.Payer = &payer
 
 	return r
 }
 
+//SetSender ...
 func (r *CreateOrderRequest) SetSender(address Address) *CreateOrderRequest {
-	a := dpdSoap.Address(address)
-	r.Header.SenderAddress = &a
+	r.Header.SenderAddress = &address
 
 	return r
 }
 
+//SetPickupTimePeriod ...
 func (r *CreateOrderRequest) SetPickupTimePeriod(period string) *CreateOrderRequest {
 	r.Header.PickupTimePeriod = &period
 
 	return r
 }
 
+//SetRegularNum regular DPD order number. Ask your manager about correct number if you use it
 func (r *CreateOrderRequest) SetRegularNum(num string) *CreateOrderRequest {
 	r.Header.RegularNum = &num
 
 	return r
 }
 
+//AddOrder to CreateOrderRequest
 func (r *CreateOrderRequest) AddOrder(order *Order) *CreateOrderRequest {
-	o := dpdSoap.Order(*order)
-	r.Order = append(r.Order, &o)
+	r.Order = append(r.Order, order)
 
 	return r
 }
 
-func (r *CreateOrderRequest) toDPDRequest() *dpdSoap.DpdOrdersData {
-	dpdRequest := dpdSoap.DpdOrdersData(*r)
-
-	return &dpdRequest
-}
-
-type Order dpdSoap.Order
-
+//NewOrder ...
 func NewOrder() *Order {
-	var parcel []*dpdSoap.Parcel
-	var extraService []*dpdSoap.OrderExtraService
-	var extraParameter []*dpdSoap.Parameter
-	var unitLoad []*dpdSoap.UnitLoad
+	var parcel []*Parcel
+	var extraService []*ExtraService
+	var extraParameter []*ExtraParameter
+	var unitLoad []*UnitLoadOrder
 
 	return &Order{
 		ExtraParam:   extraParameter,
@@ -85,54 +74,63 @@ func NewOrder() *Order {
 	}
 }
 
+//SetInternalOrderNumber imply client side order number
 func (o *Order) SetInternalOrderNumber(number string) *Order {
 	o.OrderNumberInternal = &number
 
 	return o
 }
 
+//SetServiceCode code of DPD service
 func (o *Order) SetServiceCode(code string) *Order {
 	o.ServiceCode = &code
 
 	return o
 }
 
+//SetServiceVariant delivery variant& Four variants are available(ДД, ДТ, ТД, ТТ)
 func (o *Order) SetServiceVariant(variant string) *Order {
 	o.ServiceVariant = &variant
 
 	return o
 }
 
-func (o *Order) SetCargoNumPack(num int) *Order {
+//SetCargoCount ...
+func (o *Order) SetCargoCount(num int) *Order {
 	o.CargoNumPack = &num
 
 	return o
 }
 
+//SetCargoWeight ...
 func (o *Order) SetCargoWeight(weight float64) *Order {
 	o.CargoWeight = &weight
 
 	return o
 }
 
+//SetCargoVolume ...
 func (o *Order) SetCargoVolume(volume float64) *Order {
 	o.CargoVolume = &volume
 
 	return o
 }
 
-func (o *Order) SetCargoRegistered(flag bool) *Order {
+//SetValuableCargo ...
+func (o *Order) SetValuableCargo(flag bool) *Order {
 	o.CargoRegistered = &flag
 
 	return o
 }
 
+//SetCargoValue ...
 func (o *Order) SetCargoValue(value float64) *Order {
 	o.CargoValue = &value
 
 	return o
 }
 
+//SerCargoCategory ...
 func (o *Order) SerCargoCategory(category string) *Order {
 	o.CargoCategory = &category
 
@@ -152,48 +150,40 @@ func (o *Order) SetPaymentType(pType string) *Order {
 }
 
 func (o *Order) SetReceiverAddress(address *Address) *Order {
-	a := dpdSoap.Address(*address)
-	o.ReceiverAddress = &a
+	o.ReceiverAddress = address
 
 	return o
 }
 
 func (o *Order) SetReturnAddress(address *Address) *Order {
-	a := dpdSoap.Address(*address)
-	o.ReturnAddress = &a
+	o.ReturnAddress = address
 
 	return o
 }
 
 func (o *Order) AddExtraParameter(parameter *ExtraParameter) *Order {
-	p := dpdSoap.Parameter(*parameter)
-	o.ExtraParam = append(o.ExtraParam, &p)
+	o.ExtraParam = append(o.ExtraParam, parameter)
 
 	return o
 }
 
 func (o *Order) AddExtraService(service *ExtraService) *Order {
-	s := dpdSoap.OrderExtraService(*service)
-	o.ExtraService = append(o.ExtraService, &s)
+	o.ExtraService = append(o.ExtraService, service)
 
 	return o
 }
 
 func (o *Order) AddParcel(parcel *Parcel) *Order {
-	p := dpdSoap.Parcel(*parcel)
-	o.Parcel = append(o.Parcel, &p)
+	o.Parcel = append(o.Parcel, parcel)
 
 	return o
 }
 
-func (o *Order) AddUnitLoad(load *UnitLoad) *Order {
-	u := dpdSoap.UnitLoad(*load)
-	o.UnitLoad = append(o.UnitLoad, &u)
+func (o *Order) AddUnitLoad(load *UnitLoadOrder) *Order {
+	o.UnitLoad = append(o.UnitLoad, load)
 
 	return o
 }
-
-type Address dpdSoap.Address
 
 func NewAddress() *Address {
 	return new(Address)
@@ -355,8 +345,6 @@ func (a *Address) SetNeedPass(flag bool) *Address {
 	return a
 }
 
-type Parcel dpdSoap.Parcel
-
 func NewParcel() *Parcel {
 	return new(Parcel)
 }
@@ -421,10 +409,8 @@ func (p *Parcel) SetCodAmount(amount float64) *Parcel {
 	return p
 }
 
-type UpdateOrderRequest dpdSoap.DpdOrderCorrection
-
 func NewUpdateOrderRequest() *UpdateOrderRequest {
-	var parcels []*dpdSoap.Parcel
+	var parcels []*Parcel
 
 	req := new(UpdateOrderRequest)
 	req.Parcel = parcels
@@ -475,47 +461,36 @@ func (r *UpdateOrderRequest) SetCargoCategory(category string) *UpdateOrderReque
 }
 
 func (r *UpdateOrderRequest) AddParcel(parcel *Parcel) *UpdateOrderRequest {
-	p := dpdSoap.Parcel(*parcel)
-	r.Parcel = append(r.Parcel, &p)
+	r.Parcel = append(r.Parcel, parcel)
 
 	return r
 }
 
-func (r *UpdateOrderRequest) toDPDRequest() *dpdSoap.DpdOrderCorrection {
-	dpdReq := dpdSoap.DpdOrderCorrection(*r)
-
-	return &dpdReq
+func NewOrderToCancel() *OrderToCancel {
+	return new(OrderToCancel)
 }
 
-type Order2Cancel dpdSoap.OrderCancel
-
-func NewOrder2Cancel() *Order2Cancel {
-	return new(Order2Cancel)
-}
-
-func (o *Order2Cancel) SetInternalOrderNumber(number string) *Order2Cancel {
+func (o *OrderToCancel) SetInternalOrderNumber(number string) *OrderToCancel {
 	o.OrderNumberInternal = &number
 
 	return o
 }
 
-func (o *Order2Cancel) SetDPDOrderNumber(number string) *Order2Cancel {
+func (o *OrderToCancel) SetDPDOrderNumber(number string) *OrderToCancel {
 	o.OrderNum = &number
 
 	return o
 }
 
-func (o *Order2Cancel) SetPickupDate(time time.Time) *Order2Cancel {
-	d := dpdSoap.Date(time.Format("2006-01-02"))
-	o.Pickupdate = &d
+func (o *OrderToCancel) SetPickupDate(time time.Time) *OrderToCancel {
+	d := time.Format("2006-01-02")
+	o.PickupDate = &d
 
 	return o
 }
 
-type CancelOrderRequest dpdSoap.DpdOrderCancellation
-
 func NewCancelOrderRequest() *CancelOrderRequest {
-	var orders []*dpdSoap.OrderCancel
+	var orders []*OrderToCancel
 
 	req := new(CancelOrderRequest)
 	req.Cancel = orders
@@ -523,15 +498,8 @@ func NewCancelOrderRequest() *CancelOrderRequest {
 	return req
 }
 
-func (r *CancelOrderRequest) AddOrder(order *Order2Cancel) *CancelOrderRequest {
-	o := dpdSoap.OrderCancel(*order)
-	r.Cancel = append(r.Cancel, &o)
+func (r *CancelOrderRequest) AddOrder(order *OrderToCancel) *CancelOrderRequest {
+	r.Cancel = append(r.Cancel, order)
 
 	return r
-}
-
-func (r *CancelOrderRequest) toDPDRequest() *dpdSoap.DpdOrderCancellation {
-	dpdReq := dpdSoap.DpdOrderCancellation(*r)
-
-	return &dpdReq
 }

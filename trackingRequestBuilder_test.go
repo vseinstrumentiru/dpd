@@ -5,18 +5,16 @@ import (
 	"strconv"
 	"testing"
 	"time"
-
-	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 func TestNewClientOrderRequest(t *testing.T) {
 	tests := []struct {
 		name string
-		want *ClientOrderRequest
+		want *TrackByClientOrderRequest
 	}{
 		{
 			"Constructor",
-			&ClientOrderRequest{},
+			&TrackByClientOrderRequest{},
 		},
 	}
 	for _, tt := range tests {
@@ -32,21 +30,21 @@ func TestClientOrderRequest_SetClientOrderNumber(t *testing.T) {
 	type args struct {
 		number string
 	}
-	orderNumber := "any string"
+	orderNumber := anyString
 
 	tests := []struct {
 		name string
-		r    *ClientOrderRequest
+		r    *TrackByClientOrderRequest
 		args args
-		want *ClientOrderRequest
+		want *TrackByClientOrderRequest
 	}{
 		{
 			"Set order number",
-			&ClientOrderRequest{},
+			&TrackByClientOrderRequest{},
 			args{
 				orderNumber,
 			},
-			&ClientOrderRequest{
+			&TrackByClientOrderRequest{
 				ClientOrderNr: &orderNumber,
 			},
 		},
@@ -54,7 +52,7 @@ func TestClientOrderRequest_SetClientOrderNumber(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.r.SetClientOrderNumber(tt.args.number); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ClientOrderRequest.SetClientOrderNumber() = %v, want %v", got, tt.want)
+				t.Errorf("TrackByClientOrderRequest.SetClientOrderNumber() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -66,21 +64,21 @@ func TestClientOrderRequest_SetPickupDate(t *testing.T) {
 	}
 
 	now := time.Now()
-	dpdDate := dpdSoap.Date(now.Format("2006-01-02"))
+	dpdDate := now.Format("2006-01-02")
 
 	tests := []struct {
 		name string
-		r    *ClientOrderRequest
+		r    *TrackByClientOrderRequest
 		args args
-		want *ClientOrderRequest
+		want *TrackByClientOrderRequest
 	}{
 		{
 			"Set pickup date",
-			&ClientOrderRequest{},
+			&TrackByClientOrderRequest{},
 			args{
 				now,
 			},
-			&ClientOrderRequest{
+			&TrackByClientOrderRequest{
 				PickupDate: &dpdDate,
 			},
 		},
@@ -88,114 +86,7 @@ func TestClientOrderRequest_SetPickupDate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.r.SetPickupDate(tt.args.time); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ClientOrderRequest.SetPickupDate() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestClientOrderRequest_toDPDRequest(t *testing.T) {
-	tests := []struct {
-		name string
-		r    *ClientOrderRequest
-		want *dpdSoap.RequestClientOrder
-	}{
-		{
-			"Converter",
-			&ClientOrderRequest{},
-			&dpdSoap.RequestClientOrder{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.toDPDRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ClientOrderRequest.toDPDRequest() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestNewClientParcelRequest(t *testing.T) {
-	tests := []struct {
-		name string
-		want *ClientParcelRequest
-	}{
-		{
-			"Constructor",
-			&ClientParcelRequest{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewClientParcelRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewClientParcelRequest() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestClientParcelRequest_SetClientParcelNumber(t *testing.T) {
-	type args struct {
-		number string
-	}
-
-	number := "any string"
-
-	tests := []struct {
-		name string
-		r    *ClientParcelRequest
-		args args
-		want *ClientParcelRequest
-	}{
-		{
-			"Set client parcel number",
-			&ClientParcelRequest{},
-			args{
-				number,
-			},
-			&ClientParcelRequest{
-				ClientParcelNr: &number,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.SetClientParcelNumber(tt.args.number); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ClientParcelRequest.SetClientParcelNumber() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestClientParcelRequest_SetPickupDate(t *testing.T) {
-	type args struct {
-		time time.Time
-	}
-
-	now := time.Now()
-	dpdDate := dpdSoap.Date(now.Format("2006-01-02"))
-
-	tests := []struct {
-		name string
-		r    *ClientParcelRequest
-		args args
-		want *ClientParcelRequest
-	}{
-		{
-			"Set pickup date",
-			&ClientParcelRequest{},
-			args{
-				now,
-			},
-			&ClientParcelRequest{
-				PickupDate: &dpdDate,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.SetPickupDate(tt.args.time); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ClientParcelRequest.SetPickupDate() = %v, want %v", got, tt.want)
+				t.Errorf("TrackByClientOrderRequest.SetPickupDate() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -204,11 +95,11 @@ func TestClientParcelRequest_SetPickupDate(t *testing.T) {
 func TestNewDpdOrderRequest(t *testing.T) {
 	tests := []struct {
 		name string
-		want *DpdOrderRequest
+		want *TrackByDPDOrderRequest
 	}{
 		{
 			"Constructor",
-			&DpdOrderRequest{},
+			&TrackByDPDOrderRequest{},
 		},
 	}
 	for _, tt := range tests {
@@ -225,21 +116,21 @@ func TestDpdOrderRequest_SetDPDOrderNumber(t *testing.T) {
 		number string
 	}
 
-	number := "any string"
+	number := anyString
 
 	tests := []struct {
 		name string
-		r    *DpdOrderRequest
+		r    *TrackByDPDOrderRequest
 		args args
-		want *DpdOrderRequest
+		want *TrackByDPDOrderRequest
 	}{
 		{
 			"DPD order number",
-			&DpdOrderRequest{},
+			&TrackByDPDOrderRequest{},
 			args{
 				number,
 			},
-			&DpdOrderRequest{
+			&TrackByDPDOrderRequest{
 				DpdOrderNr: &number,
 			},
 		},
@@ -247,7 +138,7 @@ func TestDpdOrderRequest_SetDPDOrderNumber(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.r.SetDPDOrderNumber(tt.args.number); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DpdOrderRequest.SetDPDOrderNumber() = %v, want %v", got, tt.want)
+				t.Errorf("TrackByDPDOrderRequest.SetDPDOrderNumber() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -261,23 +152,23 @@ func TestDpdOrderRequest_SetPickupYear(t *testing.T) {
 	year, err := strconv.Atoi(time.Now().Format("2006"))
 
 	if err != nil {
-		t.Errorf("DpdOrderRequest.SetPickupYear(), err %s", err.Error())
+		t.Errorf("TrackByDPDOrderRequest.SetPickupYear(), err %s", err.Error())
 		t.SkipNow()
 	}
 
 	tests := []struct {
 		name string
-		r    *DpdOrderRequest
+		r    *TrackByDPDOrderRequest
 		args args
-		want *DpdOrderRequest
+		want *TrackByDPDOrderRequest
 	}{
 		{
 			"Set pickup year",
-			&DpdOrderRequest{},
+			&TrackByDPDOrderRequest{},
 			args{
 				year,
 			},
-			&DpdOrderRequest{
+			&TrackByDPDOrderRequest{
 				PickupYear: &year,
 			},
 		},
@@ -285,202 +176,7 @@ func TestDpdOrderRequest_SetPickupYear(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.r.SetPickupYear(tt.args.year); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DpdOrderRequest.SetPickupYear() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestDpdOrderRequest_toDPDRequest(t *testing.T) {
-	tests := []struct {
-		name string
-		r    *DpdOrderRequest
-		want *dpdSoap.RequestDpdOrder
-	}{
-		{
-			"Converter",
-			&DpdOrderRequest{},
-			&dpdSoap.RequestDpdOrder{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.toDPDRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DpdOrderRequest.toDPDRequest() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestNewConfirmRequest(t *testing.T) {
-	tests := []struct {
-		name string
-		want *ConfirmRequest
-	}{
-		{
-			"Constructor",
-			&ConfirmRequest{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewConfirmRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewConfirmRequest() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestConfirmRequest_SetDocId(t *testing.T) {
-	type args struct {
-		docId int64
-	}
-
-	var docID int64 = 12341241242
-
-	tests := []struct {
-		name string
-		r    *ConfirmRequest
-		args args
-		want *ConfirmRequest
-	}{
-		{
-			"Set doc id",
-			&ConfirmRequest{},
-			args{
-				docID,
-			},
-			&ConfirmRequest{
-				DocId: &docID,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.SetDocId(tt.args.docId); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ConfirmRequest.SetDocId() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestDpdTrackingEventRequest_SetDateFrom(t *testing.T) {
-	type args struct {
-		from time.Time
-	}
-
-	from := time.Now()
-	dpdDateTime := dpdSoap.DateTime(from.Format("2006-01-02 15:04:05"))
-
-	tests := []struct {
-		name string
-		r    *DpdTrackingEventRequest
-		args args
-		want *DpdTrackingEventRequest
-	}{
-		{
-			"Set date from",
-			&DpdTrackingEventRequest{},
-			args{
-				from,
-			},
-			&DpdTrackingEventRequest{
-				DateFrom: &dpdDateTime,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.SetDateFrom(tt.args.from); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DpdTrackingEventRequest.SetDateFrom() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestDpdTrackingEventRequest_SetDateTo(t *testing.T) {
-	type args struct {
-		to time.Time
-	}
-
-	to := time.Now()
-	dpdDateTime := dpdSoap.DateTime(to.Format("2006-01-02 15:04:05"))
-
-	tests := []struct {
-		name string
-		r    *DpdTrackingEventRequest
-		args args
-		want *DpdTrackingEventRequest
-	}{
-		{
-			"Set date to",
-			&DpdTrackingEventRequest{},
-			args{
-				to,
-			},
-			&DpdTrackingEventRequest{
-				DateTo: &dpdDateTime,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.SetDateTo(tt.args.to); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DpdTrackingEventRequest.SetDateTo() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestDpdTrackingEventRequest_SetMaxRowCount(t *testing.T) {
-	type args struct {
-		count int
-	}
-
-	count := 2
-
-	tests := []struct {
-		name string
-		r    *DpdTrackingEventRequest
-		args args
-		want *DpdTrackingEventRequest
-	}{
-		{
-			"Max row count",
-			&DpdTrackingEventRequest{},
-			args{
-				count,
-			},
-			&DpdTrackingEventRequest{
-				MaxRowCount: &count,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.SetMaxRowCount(tt.args.count); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DpdTrackingEventRequest.SetMaxRowCount() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestDpdTrackingEventRequest_toDPDRequest(t *testing.T) {
-	tests := []struct {
-		name string
-		r    *DpdTrackingEventRequest
-		want *dpdSoap.EventTrackingRequest
-	}{
-		{
-			"Converter",
-			&DpdTrackingEventRequest{},
-			&dpdSoap.EventTrackingRequest{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.toDPDRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DpdTrackingEventRequest.toDPDRequest() = %v, want %v", got, tt.want)
+				t.Errorf("TrackByDPDOrderRequest.SetPickupYear() = %v, want %v", got, tt.want)
 			}
 		})
 	}
