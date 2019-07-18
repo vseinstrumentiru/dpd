@@ -1,0 +1,20 @@
+run:
+  # timeout for analysis, e.g. 30s, 5m, default is 1m
+  deadline: 5m
+linters:
+  enable-all: true
+  disable:
+    - scopelint
+linters-settings:
+  misspell:
+    locale: US
+issues:
+  max-same: 0
+  max-per-linter: 0
+  exclude:
+    # gosec: Duplicated errcheck checks
+    - G104
+    # gosec: TLS InsecureSkipVerify may be true
+    - G402
+    # gosec: weak random number generator in app is ok
+    - G404

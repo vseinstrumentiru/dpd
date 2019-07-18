@@ -2,289 +2,353 @@ package dpd
 
 import (
 	"github.com/fiorix/wsdl2go/soap"
-	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
-//Client to call DPD SOAP api methods
-//
-//Names of functions are equals original DPD SOAP methods names
-type DPDClient struct {
-	auth     DPDAuth
-	urls     DPDUrls
-	services *services
+//Client for DPD soap api
+type Client struct {
+	auth     *Auth
+	services *soapClients
 }
 
-//DPD authorization
-type DPDAuth struct {
-	ClientNumber int64
-	ClientKey    string
+//ServiceUrls DPD services urls
+type ServiceUrls struct {
+	CalculatorURL string
+	GeographyURL  string
+	OrderURL      string
+	TrackingURL   string
 }
 
-//URLs of DPD services
-type DPDUrls struct {
-	CalculatorUrl string
-	GeographyUrl  string
-	OrderUrl      string
-	TrackingUrl   string
+type soapClients struct {
+	geography  *soap.Client
+	order      *soap.Client
+	calculator *soap.Client
+	tracking   *soap.Client
 }
 
-type services struct {
-	geography  dpdSoap.DPDGeography2
-	order      dpdSoap.DPDOrder
-	calculator dpdSoap.DPDCalculator
-	tracking   dpdSoap.ParcelTracing
-}
-
-//Creates new client
-func NewDPDClient(auth DPDAuth, urls DPDUrls) *DPDClient {
-	return &DPDClient{
-		auth:     auth,
-		urls:     urls,
-		services: &services{},
-	}
-}
-
-const (
-	ScehduleSelfDelivery = "SelfDelivery"
-)
-
-func (cl *DPDClient) getGeographyService() dpdSoap.DPDGeography2 {
-	if cl.services.geography == nil {
-		client := soap.Client{
-			Namespace: dpdSoap.GeographyNamespace,
-			URL:       cl.urls.GeographyUrl,
-		}
-
-		cl.services.geography = dpdSoap.NewDPDGeography2(&client)
-	}
-
-	return cl.services.geography
-}
-
-func (cl *DPDClient) getOrderService() dpdSoap.DPDOrder {
-	if cl.services.order == nil {
-		client := soap.Client{
-			Namespace: dpdSoap.OrderNamespace,
-			URL:       cl.urls.OrderUrl,
-		}
-
-		cl.services.order = dpdSoap.NewDPDOrder(&client)
-	}
-
-	return cl.services.order
-}
-
-func (cl *DPDClient) getCalculatorService() dpdSoap.DPDCalculator {
-	if cl.services.calculator == nil {
-		client := soap.Client{
-			Namespace: dpdSoap.CalculatorNamespace,
-			URL:       cl.urls.CalculatorUrl,
-		}
-
-		cl.services.calculator = dpdSoap.NewDPDCalculator(&client)
-	}
-
-	return cl.services.calculator
-}
-
-func (cl *DPDClient) getTrackingService() dpdSoap.ParcelTracing {
-	if cl.services.tracking == nil {
-		client := soap.Client{
-			Namespace: dpdSoap.TrackingNamespace,
-			URL:       cl.urls.TrackingUrl,
-		}
-
-		cl.services.tracking = dpdSoap.NewParcelTracing(&client)
-	}
-
-	return cl.services.tracking
-}
-
-//Get list of pickup/delivery points with restrictions about weight and dimensions
-func (cl *DPDClient) GetParcelShops(r *ParcelShopRequest) ([]*dpdSoap.ParcelShop, error) {
-	req := r.toDPDRequest()
-	req.Auth = cl.getAuth()
-	req.Ns = ""
-
-	result, err := cl.getGeographyService().GetParcelShops(&dpdSoap.GetParcelShops{
-		Request: req,
-		Ns:      dpdSoap.GeographyNamespace,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Return.ParcelShop, nil
-}
-
-//Get terminals list. They don't have any restrictions
-func (cl *DPDClient) GetTerminalsSelfDelivery2() ([]*dpdSoap.TerminalSelf, error) {
-	auth := cl.getAuth()
-	auth.Ns = new(string)
-
-	result, err := cl.getGeographyService().GetTerminalsSelfDelivery2(&dpdSoap.GetTerminalsSelfDelivery2{
-		Ns:   dpdSoap.GeographyNamespace,
-		Auth: auth,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Return.Terminal, nil
-}
-
-//Set country code according ISO 3166-1 alpha-2 standard
-//
-//https://www.iso.org/obp/ui/#search
-func (cl *DPDClient) GetCitiesCashPay(countryCode string) ([]*dpdSoap.City, error) {
-	result, err := cl.getGeographyService().GetCitiesCashPay(&dpdSoap.GetCitiesCashPay{
-		NS: dpdSoap.GeographyNamespace,
-		Request: &dpdSoap.DpdCitiesCashPayRequest{
-			Auth:        cl.getAuth(),
-			CountryCode: &countryCode,
+//NewClient creates new client
+func NewClient(clientNumber int64, clientKey string, urls ServiceUrls) *Client {
+	return &Client{
+		auth: &Auth{
+			ClientNumber: &clientNumber,
+			ClientKey:    &clientKey,
 		},
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Return, nil
-}
-
-//Calculate cost of delivery for Russia and Customs Union
-func (cl *DPDClient) GetServiceCost2(r *CalculateRequest) ([]*dpdSoap.ServiceCost, error) {
-	req := r.toDpdRequest()
-	req.Auth = cl.getAuth()
-
-	result, err := cl.getCalculatorService().GetServiceCost2(&dpdSoap.GetServiceCost2{
-		Ns:      dpdSoap.CalculatorNamespace,
-		Request: req,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Return, nil
-}
-
-func (cl *DPDClient) CreateOrder(r *CreateOrderRequest) ([]*dpdSoap.DpdOrderStatus, error) {
-	req := r.toDPDRequest()
-	req.Auth = cl.getAuth()
-
-	result, err := cl.getOrderService().CreateOrder(&dpdSoap.CreateOrder{
-		Orders: req,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Return, nil
-}
-
-//Change order. Add parcels to order
-func (cl *DPDClient) AddParcels(r *UpdateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error) {
-	req := r.toDPDRequest()
-	r.Auth = cl.getAuth()
-
-	result, err := cl.getOrderService().AddParcels(&dpdSoap.AddParcels{
-		Parcels: req,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Return, nil
-}
-
-//Change order. Remove parcels from order
-func (cl *DPDClient) RemoveParcels(r *UpdateOrderRequest) (*dpdSoap.DpdOrderCorrectionStatus, error) {
-	req := r.toDPDRequest()
-	r.Auth = cl.getAuth()
-
-	result, err := cl.getOrderService().RemoveParcels(&dpdSoap.RemoveParcels{
-		Parcels: req,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Return, nil
-}
-
-func (cl *DPDClient) CancelOrder(r *CancelOrderRequest) ([]*dpdSoap.DpdOrderStatus, error) {
-	req := r.toDPDRequest()
-	r.Auth = cl.getAuth()
-
-	result, err := cl.getOrderService().CancelOrder(&dpdSoap.CancelOrder{
-		Orders: req,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Return, nil
-}
-
-//Return all parcels statuses that changed after last request
-func (cl *DPDClient) GetStatesByClient() (*dpdSoap.StateParcels, error) {
-	result, err := cl.getTrackingService().GetStatesByClient(&dpdSoap.GetStatesByClient{
-		Request: &dpdSoap.RequestClient{
-			Auth: cl.getAuth(),
+		services: &soapClients{
+			geography: &soap.Client{
+				Namespace: geographyNamespace,
+				URL:       urls.GeographyURL,
+			},
+			order: &soap.Client{
+				Namespace: orderNamespace,
+				URL:       urls.OrderURL,
+			},
+			calculator: &soap.Client{
+				Namespace: calculatorNamespace,
+				URL:       urls.CalculatorURL,
+			},
+			tracking: &soap.Client{
+				Namespace: trackingNamespace,
+				URL:       urls.TrackingURL,
+			},
 		},
-	})
+	}
+}
 
-	if err != nil {
+//GetParcelShops return list of pickup/delivery points with restrictions about weight and dimensions
+func (cl *Client) GetParcelShops(req *ParcelShopRequest) ([]*ParcelShop, error) {
+	req.Auth = cl.auth
+	req.Namespace = ""
+
+	a := struct {
+		operationGetParcelShops `xml:"tns:getParcelShops"`
+	}{
+		operationGetParcelShops{
+			&getParcelShops{
+				req,
+				geographyNamespace,
+			},
+		},
+	}
+
+	y := struct {
+		operationGetParcelShopsResponse `xml:"getParcelShopsResponse"`
+	}{}
+
+	if err := cl.services.geography.RoundTripWithAction("GetParcelShops", a, &y); err != nil {
 		return nil, err
 	}
 
-	return result.Return, err
+	return y.operationGetParcelShopsResponse.GetParcelShopsResponse.Return.ParcelShop, nil
 }
 
-//Get list of states for all parcels for specified order
+//GetTerminalsSelfDelivery2 return terminals list. They don't have any restrictions
+func (cl *Client) GetTerminalsSelfDelivery2() ([]*Terminal, error) {
+	auth := cl.auth
+	auth.Namespace = new(string)
+
+	a := struct {
+		operationGetTerminalsSelfDelivery2 `xml:"tns:getTerminalsSelfDelivery2"`
+	}{
+		operationGetTerminalsSelfDelivery2{
+			&getTerminalsSelfDelivery2Request{
+				Auth:      auth,
+				Namespace: geographyNamespace,
+			},
+		},
+	}
+
+	y := struct {
+		operationGetTerminalsSelfDelivery2Response `xml:"getTerminalsSelfDelivery2Response"`
+	}{}
+
+	if err := cl.services.geography.RoundTripWithAction("getTerminalsSelfDelivery2Request", a, &y); err != nil {
+		return nil, err
+	}
+
+	return y.Response.Return.Terminal, nil
+}
+
+//GetCitiesCashPay countryCode must comply with ISO 3166-1 alpha-2
+func (cl *Client) GetCitiesCashPay(countryCode string) ([]*City, error) {
+	a := struct {
+		operationGetCitiesCashPay `xml:"tns:getCitiesCashPay"`
+	}{
+		operationGetCitiesCashPay{
+			&getCitiesCashPay{
+				Namespace: geographyNamespace,
+				Request: &citiesCashPayRequest{
+					Auth:        cl.auth,
+					CountryCode: &countryCode,
+				},
+			},
+		},
+	}
+
+	y := struct {
+		operationGetCitiesCashPayResponse `xml:"getCitiesCashPayResponse"`
+	}{}
+
+	if err := cl.services.geography.RoundTripWithAction("GetCitiesCashPay", a, &y); err != nil {
+		return nil, err
+	}
+
+	return y.GetCitiesCashPayResponse.Return, nil
+}
+
+//GetServiceCost2 return cost of delivery for Russia and Customs Union
+func (cl *Client) GetServiceCost2(req *CalculateRequest) ([]*ServiceCostResponse, error) {
+	req.Auth = cl.auth
+	a := struct {
+		operationGetServiceCost2 `xml:"tns:getServiceCost2"`
+	}{
+		operationGetServiceCost2{
+			&getServiceCostRequest{
+				Namespace: calculatorNamespace,
+				Request:   req,
+			},
+		},
+	}
+
+	y := struct {
+		operationGetServiceCost2Response `xml:"getServiceCost2Response"`
+	}{}
+
+	if err := cl.services.calculator.RoundTripWithAction("GetServiceCost2", a, &y); err != nil {
+		return nil, err
+	}
+
+	return y.GetServiceCostResponse.Return, nil
+}
+
+//CreateOrder create a delivery order
+func (cl *Client) CreateOrder(req *CreateOrderRequest) ([]*OrderStatus, error) {
+	req.Auth = cl.auth
+	a := struct {
+		operationCreateOrder `xml:"tns:createOrder"`
+	}{
+		operationCreateOrder{
+			&createOrder{
+				req,
+			},
+		},
+	}
+
+	y := struct {
+		operationCreateOrderResponse `xml:"createOrderResponse"`
+	}{}
+
+	if err := cl.services.order.RoundTripWithAction("CreateOrder", a, &y); err != nil {
+		return nil, err
+	}
+
+	return y.CreateOrderResponse.Return, nil
+}
+
+//AddParcels change order with parcel addition
+func (cl *Client) AddParcels(req *UpdateOrderRequest) (*OrderCorrectionStatus, error) {
+	req.Auth = cl.auth
+
+	a := struct {
+		operationAddParcels `xml:"tns:addParcels"`
+	}{
+		operationAddParcels{
+			&addParcels{
+				req,
+			},
+		},
+	}
+
+	y := struct {
+		operationAddParcelsResponse `xml:"addParcelsResponse"`
+	}{}
+
+	if err := cl.services.order.RoundTripWithAction("AddParcels", a, &y); err != nil {
+		return nil, err
+	}
+
+	return y.AddParcelsResponse.Return, nil
+}
+
+//RemoveParcels change order with parcel deletion
+func (cl *Client) RemoveParcels(req *UpdateOrderRequest) (*OrderCorrectionStatus, error) {
+	req.Auth = cl.auth
+	a := struct {
+		operationRemoveParcels `xml:"tns:removeParcels"`
+	}{
+		operationRemoveParcels{
+			&removeParcels{
+				req,
+			},
+		},
+	}
+
+	y := struct {
+		operationRemoveParcelsResponse `xml:"removeParcelsResponse"`
+	}{}
+
+	if err := cl.services.order.RoundTripWithAction("RemoveParcels", a, &y); err != nil {
+		return nil, err
+	}
+
+	return y.RemoveParcelsResponse.Return, nil
+}
+
+//CancelOrder cancel a delivery order
+func (cl *Client) CancelOrder(req *CancelOrderRequest) ([]*OrderStatus, error) {
+	req.Auth = cl.auth
+	a := struct {
+		operationCancelOrder `xml:"tns:cancelOrder"`
+	}{
+		operationCancelOrder{
+			&cancelOrder{
+				req,
+			},
+		},
+	}
+
+	y := struct {
+		operationCancelOrderResponse `xml:"cancelOrderResponse"`
+	}{}
+	if err := cl.services.order.RoundTripWithAction("CancelOrder", a, &y); err != nil {
+		return nil, err
+	}
+
+	return y.CancelOrderResponse.Return, nil
+}
+
+//GetOrderStatus returns order creation status
+func (cl *Client) GetOrderStatus(req []*InternalOrderNumber) ([]*OrderStatus, error) {
+	a := struct {
+		operationGetOrderStatus `xml:"tns:getOrderStatus"`
+	}{
+		operationGetOrderStatus{
+			&getOrderStatus{
+				&getOrderStatusRequest{
+					Auth:  cl.auth,
+					Order: req,
+				},
+			},
+		},
+	}
+
+	y := struct {
+		operationGetOrderStatusResponse `xml:"getOrderStatusResponse"`
+	}{}
+	if err := cl.services.order.RoundTripWithAction("GetOrderStatus", a, &y); err != nil {
+		return nil, err
+	}
+	return y.GetOrderStatusResponse.Return, nil
+}
+
+//GetStatesByClient returns all statuses of client parcels since previous method call
+func (cl *Client) GetStatesByClient() (*ParcelsStates, error) {
+	a := struct {
+		operationGetStatesByClient `xml:"tns:getStatesByClient"`
+	}{
+		operationGetStatesByClient{
+			&getStatesByClient{
+				&getStatesByClientRequest{
+					Auth: cl.auth,
+				},
+			},
+		},
+	}
+
+	y := struct {
+		operationGetStatesByClientResponse `xml:"getStatesByClientResponse"`
+	}{}
+
+	if err := cl.services.tracking.RoundTripWithAction("GetStatesByClient", a, &y); err != nil {
+		return nil, err
+	}
+
+	return y.GetStatesByClientResponse.Return, nil
+}
+
+//GetStatesByClientOrder returns list of states for all parcels for specified order
 //Order identify by client side order number
-func (cl *DPDClient) GetStatesByClientOrder(r *ClientOrderRequest) (*dpdSoap.StateParcels, error) {
-	req := r.toDPDRequest()
-	req.Auth = cl.getAuth()
+func (cl *Client) GetStatesByClientOrder(req *TrackByClientOrderRequest) (*ParcelsStates, error) {
+	req.Auth = cl.auth
+	a := struct {
+		operationGetStatesByClientOrder `xml:"tns:getStatesByClientOrder"`
+	}{
+		operationGetStatesByClientOrder{
+			&getStatesByClientOrder{
+				req,
+			},
+		},
+	}
 
-	result, err := cl.getTrackingService().GetStatesByClientOrder(&dpdSoap.GetStatesByClientOrder{
-		Request: req,
-	})
+	y := struct {
+		operationGetStatesByClientOrderResponse `xml:"getStatesByClientOrderResponse"`
+	}{}
 
-	if err != nil {
+	if err := cl.services.tracking.RoundTripWithAction("GetStatesByClientOrder", a, &y); err != nil {
 		return nil, err
 	}
 
-	return result.Return, nil
+	return y.GetStatesByClientOrderResponse.Return, nil
 }
 
-//Get states history for specified parcel
+//GetStatesByDPDOrder returns states history for specified parcel
 //Parcel identify by client side parcel number
-func (cl *DPDClient) GetStatesByDPDOrder(r *DpdOrderRequest) (*dpdSoap.StateParcels, error) {
-	req := r.toDPDRequest()
-	req.Auth = cl.getAuth()
+func (cl *Client) GetStatesByDPDOrder(req *TrackByDPDOrderRequest) (*ParcelsStates, error) {
+	req.Auth = cl.auth
+	a := struct {
+		operationGetStatesByDPDOrder `xml:"tns:getStatesByDPDOrder"`
+	}{
+		operationGetStatesByDPDOrder{
+			&getStatesByDPDOrder{
+				req,
+			},
+		},
+	}
 
-	result, err := cl.getTrackingService().GetStatesByDPDOrder(&dpdSoap.GetStatesByDPDOrder{
-		Request: req,
-	})
-
-	if err != nil {
+	y := struct {
+		operationGetStatesByDPDOrderResponse `xml:"getStatesByDPDOrderResponse"`
+	}{}
+	if err := cl.services.tracking.RoundTripWithAction("GetStatesByDPDOrder", a, &y); err != nil {
 		return nil, err
 	}
 
-	return result.Return, nil
-}
-
-func (cl *DPDClient) getAuth() *dpdSoap.Auth {
-	return &dpdSoap.Auth{
-		ClientNumber: &cl.auth.ClientNumber,
-		ClientKey:    &cl.auth.ClientKey,
-	}
+	return y.GetStatesByDPDOrderResponse.Return, nil
 }

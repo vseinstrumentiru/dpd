@@ -4,15 +4,13 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 func createEmptyOrderRequest() *CreateOrderRequest {
-	var orders []*dpdSoap.Order
+	var orders []*Order
 
 	return &CreateOrderRequest{
-		Header: &dpdSoap.Header{},
+		Header: &Header{},
 		Order:  orders,
 	}
 }
@@ -42,7 +40,7 @@ func TestCreateOrderRequest_SetDatePickup(t *testing.T) {
 	}
 
 	date := time.Now()
-	dpdDate := dpdSoap.Date(date.Format("2006-01-02"))
+	dpdDate := date.Format("2006-01-02")
 
 	want := createEmptyOrderRequest()
 	want.Header.DatePickup = &dpdDate
@@ -111,10 +109,9 @@ func TestCreateOrderRequest_SetSender(t *testing.T) {
 	}
 
 	address := NewAddress()
-	dpdAddress := dpdSoap.Address(*address)
 
 	want := createEmptyOrderRequest()
-	want.Header.SenderAddress = &dpdAddress
+	want.Header.SenderAddress = address
 
 	tests := []struct {
 		name string
@@ -179,7 +176,7 @@ func TestCreateOrderRequest_SetRegularNum(t *testing.T) {
 		num string
 	}
 
-	num := "any string"
+	num := anyString
 
 	want := createEmptyOrderRequest()
 	want.Header.RegularNum = &num
@@ -216,7 +213,7 @@ func TestCreateOrderRequest_AddOrder(t *testing.T) {
 	order := new(Order)
 
 	want := createEmptyOrderRequest()
-	want.Order = append(want.Order, &dpdSoap.Order{})
+	want.Order = append(want.Order, &Order{})
 
 	tests := []struct {
 		name string
@@ -242,37 +239,11 @@ func TestCreateOrderRequest_AddOrder(t *testing.T) {
 	}
 }
 
-func TestCreateOrderRequest_toDPDRequest(t *testing.T) {
-	var orders []*dpdSoap.Order
-
-	tests := []struct {
-		name string
-		r    *CreateOrderRequest
-		want *dpdSoap.DpdOrdersData
-	}{
-		{
-			"converter",
-			NewCreateOrderRequest(),
-			&dpdSoap.DpdOrdersData{
-				Header: &dpdSoap.Header{},
-				Order:  orders,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.toDPDRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CreateOrderRequest.toDPDRequest() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func createEmptyOrder() *Order {
-	var parcel []*dpdSoap.Parcel
-	var extraService []*dpdSoap.OrderExtraService
-	var extraParameter []*dpdSoap.Parameter
-	var unitLoad []*dpdSoap.UnitLoad
+	var parcel []*Parcel
+	var extraService []*ExtraService
+	var extraParameter []*ExtraParameter
+	var unitLoad []*UnitLoadOrder
 
 	return &Order{
 		ExtraParam:   extraParameter,
@@ -306,7 +277,7 @@ func TestOrder_SetInternalOrderNumber(t *testing.T) {
 		number string
 	}
 
-	number := "any string"
+	number := anyString
 
 	want := createEmptyOrder()
 	want.OrderNumberInternal = &number
@@ -340,7 +311,7 @@ func TestOrder_SetServiceCode(t *testing.T) {
 		code string
 	}
 
-	code := "any string"
+	code := anyString
 
 	want := createEmptyOrder()
 	want.ServiceCode = &code
@@ -374,7 +345,7 @@ func TestOrder_SetServiceVariant(t *testing.T) {
 		variant string
 	}
 
-	var variant = "any string"
+	var variant = anyString
 
 	want := createEmptyOrder()
 	want.ServiceVariant = &variant
@@ -430,8 +401,8 @@ func TestOrder_SetCargoNumPack(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.o.SetCargoNumPack(tt.args.num); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Order.SetCargoNumPack() = %v, want %v", got, tt.want)
+			if got := tt.o.SetCargoCount(tt.args.num); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Order.SetCargoCount() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -532,8 +503,8 @@ func TestOrder_SetCargoRegistered(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.o.SetCargoRegistered(tt.args.flag); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Order.SetCargoRegistered() = %v, want %v", got, tt.want)
+			if got := tt.o.SetValuableCargo(tt.args.flag); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Order.SetValuableCargo() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -578,7 +549,7 @@ func TestOrder_SerCargoCategory(t *testing.T) {
 		category string
 	}
 
-	category := "any string"
+	category := anyString
 
 	want := createEmptyOrder()
 	want.CargoCategory = &category
@@ -612,7 +583,7 @@ func TestOrder_SetDeliveryTimePeriod(t *testing.T) {
 		period string
 	}
 
-	period := "any string"
+	period := anyString
 
 	want := createEmptyOrder()
 	want.DeliveryTimePeriod = &period
@@ -646,7 +617,7 @@ func TestOrder_SetPaymentType(t *testing.T) {
 		pType string
 	}
 
-	var pType = "any string"
+	pType := anyString
 
 	want := createEmptyOrder()
 	want.PaymentType = &pType
@@ -683,7 +654,7 @@ func TestOrder_SetReceiverAddress(t *testing.T) {
 	address := new(Address)
 
 	want := createEmptyOrder()
-	want.ReceiverAddress = &dpdSoap.Address{}
+	want.ReceiverAddress = &Address{}
 
 	tests := []struct {
 		name string
@@ -717,7 +688,7 @@ func TestOrder_SetReturnAddress(t *testing.T) {
 	address := new(Address)
 
 	want := createEmptyOrder()
-	want.ReturnAddress = &dpdSoap.Address{}
+	want.ReturnAddress = &Address{}
 
 	tests := []struct {
 		name string
@@ -751,7 +722,7 @@ func TestOrder_AddExtraParameter(t *testing.T) {
 	parameter := new(ExtraParameter)
 
 	want := createEmptyOrder()
-	want.ExtraParam = append(want.ExtraParam, &dpdSoap.Parameter{})
+	want.ExtraParam = append(want.ExtraParam, &ExtraParameter{})
 
 	tests := []struct {
 		name string
@@ -785,7 +756,7 @@ func TestOrder_AddExtraService(t *testing.T) {
 	service := new(ExtraService)
 
 	want := createEmptyOrder()
-	want.ExtraService = append(want.ExtraService, &dpdSoap.OrderExtraService{})
+	want.ExtraService = append(want.ExtraService, &ExtraService{})
 
 	tests := []struct {
 		name string
@@ -819,7 +790,7 @@ func TestOrder_AddParcel(t *testing.T) {
 	parcel := new(Parcel)
 
 	want := createEmptyOrder()
-	want.Parcel = append(want.Parcel, &dpdSoap.Parcel{})
+	want.Parcel = append(want.Parcel, &Parcel{})
 
 	tests := []struct {
 		name string
@@ -847,13 +818,13 @@ func TestOrder_AddParcel(t *testing.T) {
 
 func TestOrder_AddUnitLoad(t *testing.T) {
 	type args struct {
-		load *UnitLoad
+		load *UnitLoadOrder
 	}
 
-	unit := new(UnitLoad)
+	unit := new(UnitLoadOrder)
 
 	want := createEmptyOrder()
-	want.UnitLoad = append(want.UnitLoad, &dpdSoap.UnitLoad{})
+	want.UnitLoad = append(want.UnitLoad, &UnitLoadOrder{})
 
 	tests := []struct {
 		name string
@@ -903,7 +874,7 @@ func TestAddress_SetCode(t *testing.T) {
 		code string
 	}
 
-	code := "any string"
+	code := anyString
 
 	tests := []struct {
 		name string
@@ -936,7 +907,7 @@ func TestAddress_SetName(t *testing.T) {
 		name string
 	}
 
-	name := "any string"
+	name := anyString
 
 	tests := []struct {
 		name string
@@ -969,7 +940,7 @@ func TestAddress_SetTerminalCode(t *testing.T) {
 		code string
 	}
 
-	terminalCode := "any string"
+	terminalCode := anyString
 
 	tests := []struct {
 		name string
@@ -1002,7 +973,7 @@ func TestAddress_SetAddressString(t *testing.T) {
 		address string
 	}
 
-	address := "any string"
+	address := anyString
 
 	tests := []struct {
 		name string
@@ -1035,7 +1006,7 @@ func TestAddress_SetCountryName(t *testing.T) {
 		name string
 	}
 
-	name := "any string"
+	name := anyString
 
 	tests := []struct {
 		name string
@@ -1068,7 +1039,7 @@ func TestAddress_SetZip(t *testing.T) {
 		zip string
 	}
 
-	zip := "any string"
+	zip := anyString
 
 	tests := []struct {
 		name string
@@ -1101,7 +1072,7 @@ func TestAddress_SetRegion(t *testing.T) {
 		region string
 	}
 
-	region := "Any string"
+	region := anyString
 
 	tests := []struct {
 		name string
@@ -1134,7 +1105,7 @@ func TestAddress_SetCity(t *testing.T) {
 		city string
 	}
 
-	city := "any string"
+	city := anyString
 
 	tests := []struct {
 		name string
@@ -1167,7 +1138,7 @@ func TestAddress_SetStreet(t *testing.T) {
 		street string
 	}
 
-	street := "any string"
+	street := anyString
 
 	tests := []struct {
 		name string
@@ -1200,7 +1171,7 @@ func TestAddress_SetStreetAbbr(t *testing.T) {
 		abbr string
 	}
 
-	abbr := "any string"
+	abbr := anyString
 
 	tests := []struct {
 		name string
@@ -1233,7 +1204,7 @@ func TestAddress_SetHouse(t *testing.T) {
 		house string
 	}
 
-	house := "any string"
+	house := anyString
 
 	tests := []struct {
 		name string
@@ -1266,7 +1237,7 @@ func TestAddress_SetHousing(t *testing.T) {
 		housing string
 	}
 
-	housing := "any string"
+	housing := anyString
 
 	tests := []struct {
 		name string
@@ -1299,7 +1270,7 @@ func TestAddress_SetBuilding(t *testing.T) {
 		building string
 	}
 
-	building := "any string"
+	building := anyString
 
 	tests := []struct {
 		name string
@@ -1332,7 +1303,7 @@ func TestAddress_SetPossession(t *testing.T) {
 		possession string
 	}
 
-	possession := "any string"
+	possession := anyString
 
 	tests := []struct {
 		name string
@@ -1365,7 +1336,7 @@ func TestAddress_SetExtraInfo(t *testing.T) {
 		info string
 	}
 
-	info := "any string"
+	info := anyString
 
 	tests := []struct {
 		name string
@@ -1398,7 +1369,7 @@ func TestAddress_SetOffice(t *testing.T) {
 		office string
 	}
 
-	office := "any string"
+	office := anyString
 
 	tests := []struct {
 		name string
@@ -1431,7 +1402,7 @@ func TestAddress_SetFlat(t *testing.T) {
 		flat string
 	}
 
-	flat := "any string"
+	flat := anyString
 
 	tests := []struct {
 		name string
@@ -1596,7 +1567,7 @@ func TestAddress_SetContactFullName(t *testing.T) {
 		fullName string
 	}
 
-	fullName := "any string"
+	fullName := anyString
 
 	tests := []struct {
 		name string
@@ -1629,7 +1600,7 @@ func TestAddress_SetContactPhone(t *testing.T) {
 		phone string
 	}
 
-	phone := "any string"
+	phone := anyString
 
 	tests := []struct {
 		name string
@@ -1662,7 +1633,7 @@ func TestAddress_SetContactEmail(t *testing.T) {
 		email string
 	}
 
-	email := "any string"
+	email := anyString
 
 	tests := []struct {
 		name string
@@ -1695,7 +1666,7 @@ func TestAddress_SetInstructions(t *testing.T) {
 		instructions string
 	}
 
-	instructions := "any string"
+	instructions := anyString
 
 	tests := []struct {
 		name string
@@ -1780,7 +1751,7 @@ func TestParcel_SetNumber(t *testing.T) {
 		number string
 	}
 
-	number := "any string"
+	number := anyString
 
 	tests := []struct {
 		name string
@@ -1846,7 +1817,7 @@ func TestParcel_SetNumberForPrint(t *testing.T) {
 		number string
 	}
 
-	number := "any string"
+	number := anyString
 
 	tests := []struct {
 		name string
@@ -2129,7 +2100,7 @@ func TestUpdateOrderRequest_SetDPDOrderNumber(t *testing.T) {
 		number string
 	}
 
-	number := "any string"
+	number := anyString
 
 	tests := []struct {
 		name string
@@ -2162,7 +2133,7 @@ func TestUpdateOrderRequest_SetInternalOrderNumber(t *testing.T) {
 		number string
 	}
 
-	number := "any string"
+	number := anyString
 
 	tests := []struct {
 		name string
@@ -2327,7 +2298,7 @@ func TestUpdateOrderRequest_SetCargoCategory(t *testing.T) {
 		category string
 	}
 
-	category := "any string"
+	category := anyString
 
 	tests := []struct {
 		name string
@@ -2361,9 +2332,9 @@ func TestUpdateOrderRequest_AddParcel(t *testing.T) {
 	}
 
 	parcel := NewParcel()
-	parcels := make([]*dpdSoap.Parcel, 0)
+	parcels := make([]*Parcel, 0)
 
-	parcels = append(parcels, &dpdSoap.Parcel{})
+	parcels = append(parcels, &Parcel{})
 
 	tests := []struct {
 		name string
@@ -2391,41 +2362,20 @@ func TestUpdateOrderRequest_AddParcel(t *testing.T) {
 	}
 }
 
-func TestUpdateOrderRequest_toDPDRequest(t *testing.T) {
-	tests := []struct {
-		name string
-		r    *UpdateOrderRequest
-		want *dpdSoap.DpdOrderCorrection
-	}{
-		{
-			"Convert to DPD request",
-			NewUpdateOrderRequest(),
-			&dpdSoap.DpdOrderCorrection{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.toDPDRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("UpdateOrderRequest.toDPDRequest() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestNewOrder2Cancel(t *testing.T) {
 	tests := []struct {
 		name string
-		want *Order2Cancel
+		want *OrderToCancel
 	}{
 		{
 			"Constructor",
-			&Order2Cancel{},
+			&OrderToCancel{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewOrder2Cancel(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewOrder2Cancel() = %v, want %v", got, tt.want)
+			if got := NewOrderToCancel(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewOrderToCancel() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -2436,21 +2386,21 @@ func TestOrder2Cancel_SetInternalOrderNumber(t *testing.T) {
 		number string
 	}
 
-	number := "any string"
+	number := anyString
 
 	tests := []struct {
 		name string
-		o    *Order2Cancel
+		o    *OrderToCancel
 		args args
-		want *Order2Cancel
+		want *OrderToCancel
 	}{
 		{
 			"Set internal order number",
-			NewOrder2Cancel(),
+			NewOrderToCancel(),
 			args{
 				number,
 			},
-			&Order2Cancel{
+			&OrderToCancel{
 				OrderNumberInternal: &number,
 			},
 		},
@@ -2458,7 +2408,7 @@ func TestOrder2Cancel_SetInternalOrderNumber(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.o.SetInternalOrderNumber(tt.args.number); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Order2Cancel.SetInternalOrderNumber() = %v, want %v", got, tt.want)
+				t.Errorf("OrderToCancel.SetInternalOrderNumber() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -2469,21 +2419,21 @@ func TestOrder2Cancel_SetDPDOrderNumber(t *testing.T) {
 		number string
 	}
 
-	number := "any string"
+	number := anyString
 
 	tests := []struct {
 		name string
-		o    *Order2Cancel
+		o    *OrderToCancel
 		args args
-		want *Order2Cancel
+		want *OrderToCancel
 	}{
 		{
 			"Set DPD order number",
-			NewOrder2Cancel(),
+			NewOrderToCancel(),
 			args{
 				number,
 			},
-			&Order2Cancel{
+			&OrderToCancel{
 				OrderNum: &number,
 			},
 		},
@@ -2491,7 +2441,7 @@ func TestOrder2Cancel_SetDPDOrderNumber(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.o.SetDPDOrderNumber(tt.args.number); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Order2Cancel.SetDPDOrderNumber() = %v, want %v", got, tt.want)
+				t.Errorf("OrderToCancel.SetDPDOrderNumber() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -2503,36 +2453,36 @@ func TestOrder2Cancel_SetPickupDate(t *testing.T) {
 	}
 
 	now := time.Now()
-	dpdDate := dpdSoap.Date(now.Format("2006-01-02"))
+	dpdDate := now.Format("2006-01-02")
 
 	tests := []struct {
 		name string
-		o    *Order2Cancel
+		o    *OrderToCancel
 		args args
-		want *Order2Cancel
+		want *OrderToCancel
 	}{
 		{
 			"Set pikcup date",
-			NewOrder2Cancel(),
+			NewOrderToCancel(),
 			args{
 				now,
 			},
-			&Order2Cancel{
-				Pickupdate: &dpdDate,
+			&OrderToCancel{
+				PickupDate: &dpdDate,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.o.SetPickupDate(tt.args.time); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Order2Cancel.SetPickupDate() = %v, want %v", got, tt.want)
+				t.Errorf("OrderToCancel.SetPickupDate() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
 func TestNewCancelOrderRequest(t *testing.T) {
-	var orders []*dpdSoap.OrderCancel
+	var orders []*OrderToCancel
 
 	tests := []struct {
 		name string
@@ -2556,12 +2506,12 @@ func TestNewCancelOrderRequest(t *testing.T) {
 
 func TestCancelOrderRequest_AddOrder(t *testing.T) {
 	type args struct {
-		order *Order2Cancel
+		order *OrderToCancel
 	}
 
-	var orders []*dpdSoap.OrderCancel
+	var orders []*OrderToCancel
 
-	orders = append(orders, &dpdSoap.OrderCancel{})
+	orders = append(orders, &OrderToCancel{})
 
 	tests := []struct {
 		name string
@@ -2573,7 +2523,7 @@ func TestCancelOrderRequest_AddOrder(t *testing.T) {
 			"Add order",
 			NewCancelOrderRequest(),
 			args{
-				&Order2Cancel{},
+				&OrderToCancel{},
 			},
 			&CancelOrderRequest{
 				Cancel: orders,
@@ -2584,27 +2534,6 @@ func TestCancelOrderRequest_AddOrder(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.r.AddOrder(tt.args.order); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CancelOrderRequest.AddOrder() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestCancelOrderRequest_toDPDRequest(t *testing.T) {
-	tests := []struct {
-		name string
-		r    *CancelOrderRequest
-		want *dpdSoap.DpdOrderCancellation
-	}{
-		{
-			"Converter",
-			NewCancelOrderRequest(),
-			&dpdSoap.DpdOrderCancellation{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.toDPDRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CancelOrderRequest.toDPDRequest() = %v, want %v", got, tt.want)
 			}
 		})
 	}

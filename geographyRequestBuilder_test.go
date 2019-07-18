@@ -3,8 +3,6 @@ package dpd
 import (
 	"reflect"
 	"testing"
-
-	dpdSoap "github.com/vseinstrumentiru/dpd/soap"
 )
 
 func TestNewParcelShopRequest(t *testing.T) {
@@ -153,27 +151,6 @@ func TestParcelShopRequest_SetCityName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.r.SetCityName(tt.args.name); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ParcelShopRequest.SetCityName() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestParcelShopRequest_toDPDRequest(t *testing.T) {
-	tests := []struct {
-		name string
-		r    *ParcelShopRequest
-		want *dpdSoap.DpdParcelShopRequest
-	}{
-		{
-			"Convert to DPD request",
-			&ParcelShopRequest{},
-			&dpdSoap.DpdParcelShopRequest{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.toDPDRequest(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParcelShopRequest.toDPDRequest() = %v, want %v", got, tt.want)
 			}
 		})
 	}
