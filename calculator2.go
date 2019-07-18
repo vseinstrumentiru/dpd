@@ -1,6 +1,6 @@
 package dpd
 
-const calculatorNamespace = "http://dpd.ru/ws/Calculator/2012-03-20"
+const calculatorNamespace = "http://dpd.ru/ws/calculator/2012-03-20"
 
 type operationGetServiceCost2 struct {
 	GetServiceCost2 *getServiceCostRequest `xml:"getServiceCost2,omitempty"`

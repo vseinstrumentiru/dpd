@@ -1,6 +1,6 @@
 package dpd
 
-const orderNamespace = "http://dpd.ru/ws/order2Service/2012-04-04"
+const orderNamespace = "http://dpd.ru/ws/order2/2012-04-04"
 
 type operationAddParcels struct {
 	AddParcels *addParcels `xml:"addParcels,omitempty"`
