@@ -4,6 +4,9 @@ import (
 	"github.com/fiorix/wsdl2go/soap"
 )
 
+//CityCODPaymentLimit represents default C.O.D. payment limit for all dpd cities in which C.O.D. is available
+const CityCODPaymentLimit = 250000
+
 //Client for DPD soap api
 type Client struct {
 	auth     *Auth
