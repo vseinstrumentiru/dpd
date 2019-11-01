@@ -1,6 +1,9 @@
 package dpd
 
-const geographyNamespace = "http://dpd.ru/ws/geography/2015-05-20"
+const (
+	geographyNamespace = "http://dpd.ru/ws/geography/2015-05-20"
+	cityCODPaymentLimit = 250000
+)
 
 type operationGetCitiesCashPay struct {
 	GetCitiesCashPay *getCitiesCashPay `xml:"getCitiesCashPay,omitempty"`
