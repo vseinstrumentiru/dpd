@@ -130,8 +130,8 @@ func (o *Order) SetCargoValue(value float64) *Order {
 	return o
 }
 
-//SerCargoCategory ...
-func (o *Order) SerCargoCategory(category string) *Order {
+//SetCargoCategory ...
+func (o *Order) SetCargoCategory(category string) *Order {
 	o.CargoCategory = &category
 
 	return o

@@ -544,7 +544,7 @@ func TestOrder_SetCargoValue(t *testing.T) {
 	}
 }
 
-func TestOrder_SerCargoCategory(t *testing.T) {
+func TestOrder_SetCargoCategory(t *testing.T) {
 	type args struct {
 		category string
 	}
@@ -571,8 +571,8 @@ func TestOrder_SerCargoCategory(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.o.SerCargoCategory(tt.args.category); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Order.SerCargoCategory() = %v, want %v", got, tt.want)
+			if got := tt.o.SetCargoCategory(tt.args.category); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Order.SetCargoCategory() = %v, want %v", got, tt.want)
 			}
 		})
 	}
