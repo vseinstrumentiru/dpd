@@ -265,7 +265,8 @@ func (cl *Client) GetOrderStatus(req []*InternalOrderNumber) ([]*OrderStatus, er
 	}{
 		operationGetOrderStatus{
 			&getOrderStatus{
-				&getOrderStatusRequest{
+				Namespace: orderNamespace,
+				OrderStatus: &getOrderStatusRequest{
 					Auth:  cl.auth,
 					Order: req,
 				},
