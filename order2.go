@@ -211,12 +211,14 @@ type operationGetOrderStatus struct {
 }
 
 type getOrderStatus struct {
+	Namespace   string                 `xml:"xmlns,attr"`
 	OrderStatus *getOrderStatusRequest `xml:"orderStatus,omitempty"`
 }
 
 type getOrderStatusRequest struct {
-	Auth  *Auth                  `xml:"auth,omitempty"`
-	Order []*InternalOrderNumber `xml:"order,omitempty"`
+	Namespace string                 `xml:"xmlns,attr"`
+	Auth      *Auth                  `xml:"auth,omitempty"`
+	Order     []*InternalOrderNumber `xml:"order,omitempty"`
 }
 
 //InternalOrderNumber GetOrderStatus request body. Imply client side oder number
