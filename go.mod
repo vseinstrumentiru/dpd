@@ -1,4 +1,4 @@
-module github.com/vseinstrumentiru/dpd
+module github.com/SteppenHorde/dpd
 
 require github.com/fiorix/wsdl2go v1.4.6
 
