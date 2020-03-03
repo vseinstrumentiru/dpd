@@ -170,7 +170,8 @@ func (cl *Client) CreateOrder(req *CreateOrderRequest) ([]*OrderStatus, error) {
 	}{
 		operationCreateOrder{
 			&createOrder{
-				req,
+				Namespace: orderNamespace,
+				Orders:    req,
 			},
 		},
 	}

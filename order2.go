@@ -103,14 +103,16 @@ type operationCreateOrder struct {
 }
 
 type createOrder struct {
-	Orders *CreateOrderRequest `xml:"orders,omitempty"`
+	Namespace string              `xml:"xmlns,attr"`
+	Orders    *CreateOrderRequest `xml:"orders,omitempty"`
 }
 
 //CreateOrderRequest CreateOrder request body
 type CreateOrderRequest struct {
-	Auth   *Auth    `xml:"auth,omitempty"`
-	Header *Header  `xml:"header,omitempty"`
-	Order  []*Order `xml:"order,omitempty"`
+	Namespace string   `xml:"xmlns,attr"`
+	Auth      *Auth    `xml:"auth,omitempty"`
+	Header    *Header  `xml:"header,omitempty"`
+	Order     []*Order `xml:"order,omitempty"`
 }
 
 //Order to creation
