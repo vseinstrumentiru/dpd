@@ -77,11 +77,13 @@ type operationGetStatesByDPDOrder struct {
 }
 
 type getStatesByDPDOrder struct {
-	Request *TrackByDPDOrderRequest `xml:"request,omitempty"`
+	Namespace string                  `xml:"xmlns,attr"`
+	Request   *TrackByDPDOrderRequest `xml:"request,omitempty"`
 }
 
 //TrackByDPDOrderRequest GetStatesByDPDOrder request body
 type TrackByDPDOrderRequest struct {
+	Namespace  string  `xml:"xmlns,attr"`
 	Auth       *Auth   `xml:"auth,omitempty"`
 	DpdOrderNr *string `xml:"dpdOrderNr,omitempty"`
 	PickupYear *int    `xml:"pickupYear,omitempty"`
