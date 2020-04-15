@@ -4,8 +4,12 @@ import (
 	"github.com/fiorix/wsdl2go/soap"
 )
 
-//CityCODPaymentLimit represents default C.O.D. payment limit for all dpd cities in which C.O.D. is available
-const CityCODPaymentLimit = 250000
+const (
+	trackingByDPDOrderNamespace = "http://dpd.ru/ws/tracing/2012-06-25"
+
+	//CityCODPaymentLimit represents default C.O.D. payment limit for all dpd cities in which C.O.D. is available
+	CityCODPaymentLimit = 250000
+)
 
 //Client for DPD soap api
 type Client struct {
@@ -343,7 +347,8 @@ func (cl *Client) GetStatesByDPDOrder(req *TrackByDPDOrderRequest) (*ParcelsStat
 	}{
 		operationGetStatesByDPDOrder{
 			&getStatesByDPDOrder{
-				req,
+				Namespace: trackingByDPDOrderNamespace,
+				Request:   req,
 			},
 		},
 	}
